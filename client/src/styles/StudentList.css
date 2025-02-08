@@ -1,0 +1,132 @@
+.list-container {
+	width: 100%;
+	display: flex;
+	align-items: center;
+	margin-top: 2rem;
+}
+.list-section .top {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+.list-section .top button {
+	background-color: #00959c;
+	color: white;
+	border: none;
+	border-radius: 3px;
+	font-weight: bold;
+	transition: all 0.15s ease;
+}
+.list-section .top .add {
+	padding: 0.5rem 1rem;
+}
+.list-section .top button:hover {
+	background-color: #04b3bc;
+}
+.list-section .top button span {
+	color: white;
+	font-size: 1rem;
+	margin-right: 0.3em;
+	font-weight: bold;
+}
+table {
+	width: 100%;
+	border: 1px solid #dbdddf;
+	border-collapse: collapse;
+}
+tr:hover {
+	background-color: #e8e8e8;
+	cursor: pointer;
+}
+th {
+	text-align: left;
+	padding: 0.5rem;
+	background-color: #343a42;
+	color: white;
+}
+td {
+	padding: 1rem;
+	font-size: 1.1rem;
+}
+td div {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+}
+td:first-child {
+	text-align: center;
+}
+td:nth-child(2) {
+	width: 10rem;
+}
+td:last-child {
+	display: flex;
+	justify-content: space-around;
+	border: 1px solid #dbdddf;
+	border-bottom: none;
+	border-left: none;
+}
+
+/* Add Student */
+.modal {
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	left: 0;
+	background-color: rgba(0, 0, 0, 0.5);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+form {
+	background-color: white;
+	width: 40%;
+	min-width: 40%;
+	border-radius: 3px;
+	box-shadow: 0px 5px 10px rgba(31, 31, 31, 0.5);
+}
+form .header {
+	padding: 1rem;
+	border-bottom: 1px solid #d0d9e7;
+}
+form .header p {
+	color: #44475f;
+}
+form section div {
+	margin-bottom: 1rem;
+}
+label {
+	display: block;
+}
+input,
+select {
+	padding: 0.5rem;
+	margin-top: 0.3rem;
+	border: 1px solid #d0d9e7;
+	width: 100%;
+	outline: none;
+	font-family: Arial, Helvetica, sans-serif;
+}
+input::placeholder {
+	color: #9eabbd;
+}
+button.actions {
+	padding: 0.5rem 1rem;
+	border-radius: 3px;
+	color: white;
+	border: none;
+	transition: all 0.15s ease;
+}
+button.submit {
+	background-color: #00959c;
+	margin-right: 1rem;
+}
+button.actions:hover {
+	opacity: 0.8;
+}
+button.cancel {
+	background-color: #df4f54;
+}
+/* cur

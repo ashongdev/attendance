@@ -1,0 +1,58 @@
+aside {
+	background-color: #2f3142;
+	width: 15rem;
+	color: #9eabbd;
+	position: fixed;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	padding: 1rem;
+}
+button,
+.links a,
+.role-button,
+.close,
+main section .card,
+img,
+select,
+input[type="radio"] {
+	cursor: pointer;
+}
+
+aside h1 {
+	margin-bottom: 2rem;
+	font-size: 2rem;
+	color: white;
+}
+
+.container p {
+	font-size: 0.7rem;
+	margin: 1.5rem 0;
+}
+
+.links {
+	margin-bottom: 3rem;
+}
+
+.links a {
+	padding: 0.7rem 1rem;
+	margin-bottom: 0.5rem;
+	transition: all 0.15s ease;
+	border-radius: 4px;
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	color: #9eabbd;
+	text-decoration: none;
+}
+.links a:hover {
+	background-color: #44475f;
+}
+.links a img {
+	height: 1.3rem;
+	width: 1.3rem;
+	margin-right: 1rem;
+}
+.current-link {
+	background-color: #44475f;
+}

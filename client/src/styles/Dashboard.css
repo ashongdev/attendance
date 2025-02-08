@@ -1,0 +1,70 @@
+header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	background-color: #e2e2e7;
+	padding: 0.7rem 1rem;
+	position: sticky;
+	top: 0;
+	right: 0;
+	left: 15rem;
+}
+header div {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+.icon {
+	height: 2.5rem;
+	width: 2.5rem;
+}
+.person-icon {
+	height: 3.5rem;
+	width: 3.5rem;
+	padding: 1rem;
+	border-radius: 50%;
+}
+
+main section {
+	padding: 2rem;
+}
+main section p {
+	color: #44475f;
+	font-weight: bold;
+	font-size: 1.3rem;
+}
+main section span {
+	font-weight: lighter;
+	color: #44475f;
+}
+main section .cards {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	column-gap: 1.5rem;
+	margin-top: 1.5rem;
+}
+main section .card {
+	background-color: #343a42;
+	padding: 1rem;
+	color: #9eabbd;
+	white-space: nowrap;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: flex-start;
+	border-radius: 5px;
+}
+.card div {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-top: 2rem;
+	min-width: 80%;
+	width: 100%;
+	gap: 3rem;
+}
+.card div span {
+	color: white;
+	font-size: 2rem;
+	font-weight: bold;
+}

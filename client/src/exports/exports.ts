@@ -3,6 +3,8 @@ interface ContextType {
 	role: "Admin" | "Lecturer" | "Student";
 }
 
-export const ContextProvider = createContext<ContextType | undefined>(
-	undefined
-);
+const ContextProvider = createContext<ContextType | undefined>(undefined);
+
+type Page = "Home" | "List" | "Attendance" | "Report";
+
+export { ContextProvider, Page };

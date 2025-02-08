@@ -5,7 +5,7 @@ import { ContextProvider } from "../exports/exports";
 import useFunctions from "../hooks/useFunctions";
 
 // const socket = io("http://localhost:4000");
-const socket = io("https://record-attendance.onrender.com");
+// const socket = io("https://record-attendance.onrender.com");
 
 const Context = ({ children }: { children: ReactNode }) => {
 	const { getStorageItem } = useFunctions();
