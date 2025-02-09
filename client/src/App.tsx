@@ -23,6 +23,7 @@ const App = () => {
 	const { getStorageItem } = useFunctions();
 
 	const [page, setPage] = useState<Page>(getStorageItem("page", null));
+	const [showSideBar, setShowSideBar] = useState(true);
 
 	const changePage = (page: Page) => {
 		setPage(page);
@@ -31,7 +32,7 @@ const App = () => {
 
 	return (
 		<>
-			<Sidebar changePage={changePage} page={page} />
+			{showSideBar && <Sidebar changePage={changePage} page={page} />}
 
 			<main>
 				<Header />
