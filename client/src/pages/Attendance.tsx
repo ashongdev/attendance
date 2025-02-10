@@ -2,6 +2,7 @@ import { FC, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { GroupID, Page, Status, Student } from "../exports/exports";
 import useFunctions from "../hooks/useFunctions";
+import useContextProvider from "../hooks/useContextProvider";
 
 interface Props {
 	changePage: (val: Page) => void;
@@ -9,10 +10,8 @@ interface Props {
 
 const Attendance: FC<Props> = ({ changePage }) => {
 	const { getStorageItem } = useFunctions();
+	const { studentsList } = useContextProvider();
 
-	const [studentsList] = useState<Student[]>(
-		getStorageItem("students", null)
-	);
 	const [clickedStudent, setClickedStudent] = useState("");
 	// const [showAlertPopup, setShowAlertPopup] = useState(false);
 	const [filterGroupID, setFilterGroupID] = useState<GroupID>("");
@@ -50,14 +49,6 @@ const Attendance: FC<Props> = ({ changePage }) => {
 	useEffect(() => {
 		filterStudents(filterGroupID);
 	}, [filterGroupID]);
-
-	// useEffect(() => {
-	// 	if (showAlertPopup) {
-	// 		setTimeout(() => {
-	// 			setShowAlertPopup(false);
-	// 		}, 1500);
-	// 	}
-	// }, [showAlertPopup]);
 
 	return (
 		<section className="list-section">
@@ -117,6 +108,7 @@ const Attendance: FC<Props> = ({ changePage }) => {
 							<th>Index Number</th>
 							<th>Full Name</th>
 							<th>Email</th>
+							<th>Group</th>
 							<th>Status</th>
 						</tr>
 					</thead>
@@ -128,6 +120,7 @@ const Attendance: FC<Props> = ({ changePage }) => {
 										<td>{student.indexNumber}</td>
 										<td>{student.fullName}</td>
 										<td>{student.email}</td>
+										<td>{student.groupID}</td>
 										<td>
 											<div>
 												<input
@@ -170,6 +163,7 @@ const Attendance: FC<Props> = ({ changePage }) => {
 										<td>{student.indexNumber}</td>
 										<td>{student.fullName}</td>
 										<td>{student.email}</td>
+										<td>{student.groupID}</td>
 										<td>
 											<div>
 												<input

@@ -129,4 +129,22 @@ button.actions:hover {
 button.cancel {
 	background-color: #df4f54;
 }
-/* cur
+td button {
+	border: none;
+	background-color: transparent;
+	padding: 0.5rem;
+	border-radius: 3px;
+}
+td button:first-child:hover {
+	background-color: #04b3bc;
+}
+td button:last-child:hover {
+	background-color: #df4f54;
+}
+.action-icon {
+	height: 1rem;
+	width: 1rem;
+}
+td button:hover .action-icon {
+	filter: invert(1);
+}

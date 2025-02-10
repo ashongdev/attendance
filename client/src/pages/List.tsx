@@ -3,14 +3,28 @@ import { Link } from "react-router-dom";
 import AddNewStudent from "../components/AddNewStudent";
 import SuccessAlert from "../components/SuccessAlert";
 import { Page } from "../exports/exports";
+import editIcon from "../images/create-outline.svg";
+import trashCanIcon from "../images/trash-outline.svg";
+import useFunctions from "../hooks/useFunctions";
+import useContextProvider from "../hooks/useContextProvider";
 
 interface Props {
 	changePage: (val: Page) => void;
 }
 
 const List: FC<Props> = ({ changePage }) => {
+	const { studentsList, setStudentsList } = useContextProvider();
+
 	const [openModal, setOpenModal] = useState(false);
 	const [showAlertPopup, setShowAlertPopup] = useState(false);
+
+	const removeStudent = (indexNumber: string) => {
+		const newList = studentsList.filter(
+			(std) => std.indexNumber !== indexNumber
+		);
+
+		setStudentsList(newList);
+	};
 
 	useEffect(() => {
 		if (showAlertPopup) {
@@ -20,107 +34,6 @@ const List: FC<Props> = ({ changePage }) => {
 			}, 1500);
 		}
 	}, [showAlertPopup]);
-
-	const students = [
-		{
-			no: 1,
-			indexNumber: "4211238891",
-			fullName: "John Doe",
-			groupId: "G1",
-			email: "nobody@gmail.com",
-		},
-		{
-			no: 2,
-			indexNumber: "4211238892",
-			fullName: "Jane Smith",
-			groupId: "G2",
-			email: "nobody@gmail.com",
-		},
-		{
-			no: 3,
-			indexNumber: "4211238893",
-			fullName: "Michael Johnson",
-			groupId: "G1",
-			email: "nobody@gmail.com",
-		},
-		{
-			no: 4,
-			indexNumber: "4211238894",
-			fullName: "Emily Williams",
-			groupId: "G3",
-			email: "nobody@gmail.com",
-		},
-		{
-			no: 5,
-			indexNumber: "4211238895",
-			fullName: "David Brown",
-			groupId: "G2",
-			email: "nobody@gmail.com",
-		},
-		{
-			no: 6,
-			indexNumber: "4211238896",
-			fullName: "Sarah Davis",
-			groupId: "G1",
-			email: "nobody@gmail.com",
-		},
-		{
-			no: 7,
-			indexNumber: "4211238897",
-			fullName: "Daniel Wilson",
-			groupId: "G3",
-			email: "nobody@gmail.com",
-		},
-		{
-			no: 11,
-			indexNumber: "4211238891",
-			fullName: "John Doe",
-			groupId: "G1",
-			email: "nobody@gmail.com",
-		},
-		{
-			no: 21,
-			indexNumber: "4211238892",
-			fullName: "Jane Smith",
-			groupId: "G2",
-			email: "nobody@gmail.com",
-		},
-		{
-			no: 31,
-			indexNumber: "4211238893",
-			fullName: "Michael Johnson",
-			groupId: "G1",
-			email: "nobody@gmail.com",
-		},
-		{
-			no: 41,
-			indexNumber: "4211238894",
-			fullName: "Emily Williams",
-			groupId: "G3",
-			email: "nobody@gmail.com",
-		},
-		{
-			no: 51,
-			indexNumber: "4211238895",
-			fullName: "David Brown",
-			groupId: "G2",
-			email: "nobody@gmail.com",
-		},
-		{
-			no: 61,
-			indexNumber: "4211238896",
-			fullName: "Sarah Davis",
-			groupId: "G1",
-			email: "nobody@gmail.com",
-		},
-		{
-			no: 71,
-			indexNumber: "4211238897",
-			fullName: "Daniel Wilson",
-			groupId: "G3",
-			email: "nobody@gmail.com",
-		},
-	];
 
 	return (
 		<section className="list-section">
@@ -155,16 +68,32 @@ const List: FC<Props> = ({ changePage }) => {
 						</tr>
 					</thead>
 					<tbody>
-						{students.map((student) => (
+						{studentsList.map((student) => (
 							<tr key={student.no}>
 								<td>{student.no}</td>
 								<td>{student.indexNumber}</td>
 								<td>{student.fullName}</td>
 								<td>{student.email}</td>
-								<td>{student.groupId}</td>
+								<td>{student.groupID}</td>
 								<td>
-									<button>Edit</button>
-									<button>Remove</button>
+									<button>
+										<img
+											src={editIcon}
+											className="action-icon"
+											alt="edit-icon"
+										/>
+									</button>
+									<button
+										onClick={() =>
+											removeStudent(student.indexNumber)
+										}
+									>
+										<img
+											src={trashCanIcon}
+											className="action-icon"
+											alt="delete-icon"
+										/>
+									</button>
 								</td>
 							</tr>
 						))}

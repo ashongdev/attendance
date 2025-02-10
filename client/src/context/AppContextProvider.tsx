@@ -1,7 +1,7 @@
 import Axios from "axios";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import io from "socket.io-client";
-import { ContextProvider } from "../exports/exports";
+import { ContextProvider, Student } from "../exports/exports";
 import useFunctions from "../hooks/useFunctions";
 
 // const socket = io("http://localhost:4000");
@@ -10,15 +10,21 @@ import useFunctions from "../hooks/useFunctions";
 const Context = ({ children }: { children: ReactNode }) => {
 	const { getStorageItem } = useFunctions();
 
-	const [studentList, setStudentList] = useState(
-		getStorageItem("studentList", [])
+	const [studentsList, setStudentsList] = useState<Student[]>(
+		getStorageItem("students", null)
 	);
+
+	useEffect(() => {
+		localStorage.setItem("students", JSON.stringify(studentsList));
+	}, [studentsList]);
 	const role: "Admin" | "Lecturer" | "Student" = getStorageItem("role", null);
 
 	return (
 		<ContextProvider.Provider
 			value={{
 				role,
+				studentsList,
+				setStudentsList,
 			}}
 		>
 			{children}

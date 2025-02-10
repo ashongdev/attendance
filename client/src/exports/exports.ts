@@ -1,6 +1,8 @@
 import { createContext, Dispatch, SetStateAction } from "react";
 interface ContextType {
 	role: "Admin" | "Lecturer" | "Student";
+	studentsList: Student[];
+	setStudentsList: Dispatch<SetStateAction<Student[]>>;
 }
 
 const ContextProvider = createContext<ContextType | undefined>(undefined);
@@ -8,7 +10,7 @@ const ContextProvider = createContext<ContextType | undefined>(undefined);
 type Page = "Home" | "List" | "Attendance" | "Report";
 
 type Student = {
-	no: number | string;
+	no: number;
 	indexNumber: string;
 	fullName: string;
 	groupID: string;
