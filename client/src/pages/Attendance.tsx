@@ -1,138 +1,102 @@
 import { FC, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Page } from "../exports/exports";
+import { GroupID, Page, Status, Student } from "../exports/exports";
+import useFunctions from "../hooks/useFunctions";
 
 interface Props {
 	changePage: (val: Page) => void;
 }
+
 const Attendance: FC<Props> = ({ changePage }) => {
-	const [showAlertPopup, setShowAlertPopup] = useState(false);
+	const { getStorageItem } = useFunctions();
+
+	const [studentsList] = useState<Student[]>(
+		getStorageItem("students", null)
+	);
+	const [clickedStudent, setClickedStudent] = useState("");
+	// const [showAlertPopup, setShowAlertPopup] = useState(false);
+	const [filterGroupID, setFilterGroupID] = useState<GroupID>("");
+	const [filteredStudentList, setFilterStudentList] = useState<Student[]>([]);
+	const [studentStatus, setStudentStatus] = useState<Status | null>(null);
+
+	// Filter by group
+	const filterStudents = (groupID: GroupID) => {
+		const filteredStudents = studentsList.filter(
+			(student) => student.groupID === groupID
+		);
+		setFilterStudentList(filteredStudents);
+	};
+
+	// Update status Present/Absent
+	const changeStudentStatus = async (indexNumber: string, status: Status) => {
+		// Retrieve student indexnumber and set status
+		setClickedStudent(indexNumber);
+		setStudentStatus(status);
+	};
 
 	useEffect(() => {
-		if (showAlertPopup) {
-			setTimeout(() => {
-				setShowAlertPopup(false);
-			}, 1500);
+		const student = studentsList.findIndex(
+			(std) => std.indexNumber === clickedStudent
+		);
+		if (studentStatus === "Present") {
+			studentsList[student].status = true;
+		} else if (studentStatus === "Absent") {
+			studentsList[student].status = false;
 		}
-	}, [showAlertPopup]);
 
-	const students = [
-		{
-			no: 1,
-			indexNumber: "4211238891",
-			fullName: "John Doe",
-			groupId: "G1",
-			email: "nobody@gmail.com",
-		},
-		{
-			no: 2,
-			indexNumber: "4211238892",
-			fullName: "Jane Smith",
-			groupId: "G2",
-			email: "nobody@gmail.com",
-		},
-		{
-			no: 3,
-			indexNumber: "4211238893",
-			fullName: "Michael Johnson",
-			groupId: "G1",
-			email: "nobody@gmail.com",
-		},
-		{
-			no: 4,
-			indexNumber: "4211238894",
-			fullName: "Emily Williams",
-			groupId: "G3",
-			email: "nobody@gmail.com",
-		},
-		{
-			no: 5,
-			indexNumber: "4211238895",
-			fullName: "David Brown",
-			groupId: "G2",
-			email: "nobody@gmail.com",
-		},
-		{
-			no: 6,
-			indexNumber: "4211238896",
-			fullName: "Sarah Davis",
-			groupId: "G1",
-			email: "nobody@gmail.com",
-		},
-		{
-			no: 7,
-			indexNumber: "4211238897",
-			fullName: "Daniel Wilson",
-			groupId: "G3",
-			email: "nobody@gmail.com",
-		},
-		{
-			no: 11,
-			indexNumber: "4211238891",
-			fullName: "John Doe",
-			groupId: "G1",
-			email: "nobody@gmail.com",
-		},
-		{
-			no: 21,
-			indexNumber: "4211238892",
-			fullName: "Jane Smith",
-			groupId: "G2",
-			email: "nobody@gmail.com",
-		},
-		{
-			no: 31,
-			indexNumber: "4211238893",
-			fullName: "Michael Johnson",
-			groupId: "G1",
-			email: "nobody@gmail.com",
-		},
-		{
-			no: 41,
-			indexNumber: "4211238894",
-			fullName: "Emily Williams",
-			groupId: "G3",
-			email: "nobody@gmail.com",
-		},
-		{
-			no: 51,
-			indexNumber: "4211238895",
-			fullName: "David Brown",
-			groupId: "G2",
-			email: "nobody@gmail.com",
-		},
-		{
-			no: 61,
-			indexNumber: "4211238896",
-			fullName: "Sarah Davis",
-			groupId: "G1",
-			email: "nobody@gmail.com",
-		},
-		{
-			no: 71,
-			indexNumber: "4211238897",
-			fullName: "Daniel Wilson",
-			groupId: "G3",
-			email: "nobody@gmail.com",
-		},
-	];
+		localStorage.setItem("students", JSON.stringify(studentsList));
+	}, [studentStatus]);
+
+	useEffect(() => {
+		filterStudents(filterGroupID);
+	}, [filterGroupID]);
+
+	// useEffect(() => {
+	// 	if (showAlertPopup) {
+	// 		setTimeout(() => {
+	// 			setShowAlertPopup(false);
+	// 		}, 1500);
+	// 	}
+	// }, [showAlertPopup]);
 
 	return (
 		<section className="list-section">
-			<p>Students</p>
+			<p>Attendance</p>
 			<div className="top">
 				<div>
 					<span>
 						<Link to="/" onClick={() => changePage("Home")}>
 							Home
 						</Link>
-						{"> "}
-						<Link to="/attendance">Attendance</Link> {"> "}
+						{" > "}
+						<Link
+							onClick={() => setFilterGroupID("")}
+							to="/attendance"
+						>
+							Attendance
+						</Link>
+						{" > "}
+						{filterGroupID && (
+							<>
+								<Link to="/attendance">
+									Group {filterGroupID}
+									{" > "}
+								</Link>
+							</>
+						)}
 					</span>
 				</div>
 				<button>
 					GROUP
-					<select name="group" id="group">
+					<select
+						name="group"
+						id="group"
+						value={filterGroupID}
+						onChange={(e) =>
+							setFilterGroupID(e.target.value as GroupID)
+						}
+					>
+						<option value="">--</option>
 						<option value="A">A</option>
 						<option value="B">B</option>
 						<option value="C">C</option>
@@ -157,30 +121,91 @@ const Attendance: FC<Props> = ({ changePage }) => {
 						</tr>
 					</thead>
 					<tbody>
-						{students.map((student) => (
-							<tr key={student.no}>
-								<td>{student.no}</td>
-								<td>{student.indexNumber}</td>
-								<td>{student.fullName}</td>
-								<td>{student.email}</td>
-								<td>
-									<div>
-										<input
-											type="radio"
-											name={`status${student.no}`}
-										/>
-										<span>Present</span>
-									</div>
-									<div>
-										<input
-											type="radio"
-											name={`status${student.no}`}
-										/>
-										<span>Absent</span>
-									</div>
-								</td>
-							</tr>
-						))}
+						{filteredStudentList.length <= 0
+							? studentsList.map((student) => (
+									<tr key={student.no}>
+										<td>{student.no}</td>
+										<td>{student.indexNumber}</td>
+										<td>{student.fullName}</td>
+										<td>{student.email}</td>
+										<td>
+											<div>
+												<input
+													type="radio"
+													name={`status${student.no}`}
+													defaultChecked={
+														student.status === true
+													}
+													onChange={() => {
+														changeStudentStatus(
+															student.indexNumber,
+															"Present"
+														);
+													}}
+												/>
+												<span>Present</span>
+											</div>
+											<div>
+												<input
+													type="radio"
+													name={`status${student.no}`}
+													defaultChecked={
+														student.status === false
+													}
+													onChange={(e) => {
+														changeStudentStatus(
+															student.indexNumber,
+															"Absent"
+														);
+													}}
+												/>
+												<span>Absent</span>
+											</div>
+										</td>
+									</tr>
+							  ))
+							: filteredStudentList.map((student) => (
+									<tr key={student.no}>
+										<td>{student.no}</td>
+										<td>{student.indexNumber}</td>
+										<td>{student.fullName}</td>
+										<td>{student.email}</td>
+										<td>
+											<div>
+												<input
+													type="radio"
+													name={`status${student.no}`}
+													defaultChecked={
+														student.status === true
+													}
+													onChange={() => {
+														changeStudentStatus(
+															student.indexNumber,
+															"Present"
+														);
+													}}
+												/>
+												<span>Present</span>
+											</div>
+											<div>
+												<input
+													type="radio"
+													name={`status${student.no}`}
+													defaultChecked={
+														student.status === false
+													}
+													onChange={() => {
+														changeStudentStatus(
+															student.indexNumber,
+															"Absent"
+														);
+													}}
+												/>
+												<span>Absent</span>
+											</div>
+										</td>
+									</tr>
+							  ))}
 					</tbody>
 				</table>
 			</div>
