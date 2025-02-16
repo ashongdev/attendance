@@ -3,7 +3,7 @@ import RateLimit from "express-rate-limit";
 import {
 	authenticate,
 	getStudents,
-	registerCourse,
+	editStudentInfo,
 } from "../controllers/lecturerController";
 
 export const router = Router();
@@ -18,9 +18,11 @@ const limiter = RateLimit({
 router.use(limiter);
 
 router.get("/lec/auth/:key", authenticate);
+router.get("/lec/students", getStudents);
 
 router.post("/lec/get-students", getStudents);
 
-router.post("/register-course", registerCourse);
+// router.post("/register-course", registerCourse);
+router.patch("/lec/edit", editStudentInfo);
 
 export default router;

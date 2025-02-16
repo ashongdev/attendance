@@ -10,14 +10,18 @@ import useFunctions from "../hooks/useFunctions";
 const Context = ({ children }: { children: ReactNode }) => {
 	const { getStorageItem } = useFunctions();
 
-	const [studentsList, setStudentsList] = useState<Student[]>(
-		getStorageItem("students", null)
-	);
+	const [studentsList, setStudentsList] = useState<Student[]>([
+		{
+			index_number: "",
+			fullname: "",
+			groupid: "",
+			email: "",
+			status: null,
+		},
+	]);
 
-	useEffect(() => {
-		localStorage.setItem("students", JSON.stringify(studentsList));
-	}, [studentsList]);
 	const role: "Admin" | "Lecturer" | "Student" = getStorageItem("role", null);
+	const [mode, setMode] = useState<"edit" | "add" | "list" | "">("");
 
 	return (
 		<ContextProvider.Provider
@@ -25,6 +29,8 @@ const Context = ({ children }: { children: ReactNode }) => {
 				role,
 				studentsList,
 				setStudentsList,
+				mode,
+				setMode,
 			}}
 		>
 			{children}

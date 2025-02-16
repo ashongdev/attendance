@@ -6,6 +6,7 @@ import express from "express";
 import { pool } from "./db";
 import lecturerRoutes from "./routes/lecturerRoutes";
 import studentRoutes from "./routes/studentRoutes";
+import { log } from "console";
 
 config();
 
@@ -25,13 +26,19 @@ const app = express();
 
 const corsOptions = {
 	origin: ["http://localhost:5173", "https://record-attendance.onrender.com"],
-	methods: ["GET", "POST", "OPTIONS"],
+	methods: ["GET", "POST", "OPTIONS", "PATCH"],
+	allowedHeaders: ["Content-Type", "Authorization"],
+	credentials: true,
 };
 
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
 
 app.use(express.json());
+app.use((req, res, next) => {
+	log(req.path, req.method);
+
+	next();
+});
 
 app.use(lecturerRoutes);
 app.use(studentRoutes);

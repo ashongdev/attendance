@@ -9,8 +9,8 @@ interface Props {
 }
 
 const Attendance: FC<Props> = ({ changePage }) => {
-	const { getStorageItem } = useFunctions();
-	const { studentsList } = useContextProvider();
+	const { getStudentsList } = useFunctions();
+	const { studentsList, setStudentsList } = useContextProvider();
 
 	const [clickedStudent, setClickedStudent] = useState("");
 	// const [showAlertPopup, setShowAlertPopup] = useState(false);
@@ -19,36 +19,41 @@ const Attendance: FC<Props> = ({ changePage }) => {
 	const [studentStatus, setStudentStatus] = useState<Status | null>(null);
 
 	// Filter by group
-	const filterStudents = (groupID: GroupID) => {
+	const filterStudents = (groupid: GroupID) => {
 		const filteredStudents = studentsList.filter(
-			(student) => student.groupID === groupID
+			(student) => student.groupid === groupid
 		);
 		setFilterStudentList(filteredStudents);
 	};
 
 	// Update status Present/Absent
-	const changeStudentStatus = async (indexNumber: string, status: Status) => {
-		// Retrieve student indexnumber and set status
-		setClickedStudent(indexNumber);
+	const changeStudentStatus = async (
+		index_number: string,
+		status: Status
+	) => {
+		// Retrieve student index_number and set status
+		setClickedStudent(index_number);
 		setStudentStatus(status);
 	};
 
 	useEffect(() => {
 		const student = studentsList.findIndex(
-			(std) => std.indexNumber === clickedStudent
+			(std) => std.index_number === clickedStudent
 		);
 		if (studentStatus === "Present") {
 			studentsList[student].status = true;
 		} else if (studentStatus === "Absent") {
 			studentsList[student].status = false;
 		}
-
-		localStorage.setItem("students", JSON.stringify(studentsList));
 	}, [studentStatus]);
 
 	useEffect(() => {
 		filterStudents(filterGroupID);
 	}, [filterGroupID]);
+
+	useEffect(() => {
+		getStudentsList(setStudentsList);
+	}, []);
 
 	return (
 		<section className="list-section">
@@ -67,17 +72,27 @@ const Attendance: FC<Props> = ({ changePage }) => {
 							Attendance
 						</Link>
 						{" > "}
-						{filterGroupID && (
+						{/* {filterGroupID && (
 							<>
 								<Link to="/attendance">
 									Group {filterGroupID}
-									{" > "}
 								</Link>
+								{" >"}
 							</>
-						)}
+						)} */}
+						{studentsList &&
+							studentsList.length > 0 &&
+							studentsList[0].groupid && (
+								<>
+									<Link to="/attendance">
+										Group {studentsList[0].groupid}
+									</Link>
+									{" >"}
+								</>
+							)}
 					</span>
 				</div>
-				<button>
+				{/* <button>
 					GROUP
 					<select
 						name="group"
@@ -97,7 +112,7 @@ const Attendance: FC<Props> = ({ changePage }) => {
 						<option value="G">G</option>
 						<option value="H">H</option>
 					</select>
-				</button>
+				</button> */}
 			</div>
 
 			<div className="list-container">
@@ -108,30 +123,30 @@ const Attendance: FC<Props> = ({ changePage }) => {
 							<th>Index Number</th>
 							<th>Full Name</th>
 							<th>Email</th>
-							<th>Group</th>
+							<th>Group ID</th>
 							<th>Status</th>
 						</tr>
 					</thead>
 					<tbody>
 						{filteredStudentList.length <= 0
-							? studentsList.map((student) => (
-									<tr key={student.no}>
-										<td>{student.no}</td>
-										<td>{student.indexNumber}</td>
-										<td>{student.fullName}</td>
+							? studentsList.map((student, index) => (
+									<tr key={student.index_number}>
+										<td>{index + 1}</td>
+										<td>{student.index_number}</td>
+										<td>{student.fullname}</td>
 										<td>{student.email}</td>
-										<td>{student.groupID}</td>
+										<td>{student.groupid}</td>
 										<td>
 											<div>
 												<input
 													type="radio"
-													name={`status${student.no}`}
+													name={`status${student.index_number}`}
 													defaultChecked={
 														student.status === true
 													}
 													onChange={() => {
 														changeStudentStatus(
-															student.indexNumber,
+															student.index_number,
 															"Present"
 														);
 													}}
@@ -141,13 +156,13 @@ const Attendance: FC<Props> = ({ changePage }) => {
 											<div>
 												<input
 													type="radio"
-													name={`status${student.no}`}
+													name={`status${student.index_number}`}
 													defaultChecked={
 														student.status === false
 													}
 													onChange={(e) => {
 														changeStudentStatus(
-															student.indexNumber,
+															student.index_number,
 															"Absent"
 														);
 													}}
@@ -158,23 +173,23 @@ const Attendance: FC<Props> = ({ changePage }) => {
 									</tr>
 							  ))
 							: filteredStudentList.map((student) => (
-									<tr key={student.no}>
-										<td>{student.no}</td>
-										<td>{student.indexNumber}</td>
-										<td>{student.fullName}</td>
+									<tr key={student.index_number}>
+										<td>{student.index_number}</td>
+										<td>{student.index_number}</td>
+										<td>{student.fullname}</td>
 										<td>{student.email}</td>
-										<td>{student.groupID}</td>
+										<td>{student.groupid}</td>
 										<td>
 											<div>
 												<input
 													type="radio"
-													name={`status${student.no}`}
+													name={`status${student.index_number}`}
 													defaultChecked={
 														student.status === true
 													}
 													onChange={() => {
 														changeStudentStatus(
-															student.indexNumber,
+															student.index_number,
 															"Present"
 														);
 													}}
@@ -184,13 +199,13 @@ const Attendance: FC<Props> = ({ changePage }) => {
 											<div>
 												<input
 													type="radio"
-													name={`status${student.no}`}
+													name={`status${student.index_number}`}
 													defaultChecked={
 														student.status === false
 													}
 													onChange={() => {
 														changeStudentStatus(
-															student.indexNumber,
+															student.index_number,
 															"Absent"
 														);
 													}}

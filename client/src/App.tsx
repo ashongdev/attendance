@@ -8,7 +8,7 @@ import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 import Dashboard from "./pages/Dashboard";
 import Attendance from "./pages/Attendance";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useFunctions from "./hooks/useFunctions.ts";
 import { Page } from "./exports/exports.ts";
 
@@ -19,6 +19,96 @@ import { Page } from "./exports/exports.ts";
 
 // !rnfz
 const App = () => {
+	// const students = [
+	// 	{
+	// 		index_number: "4211231891",
+	// 		fullname: "John Doe",
+	// 		groupid: "F",
+	// 		email: "nobody@gmail.com",
+	// 	},
+	// 	{
+	// 		index_number: "4214238892",
+	// 		fullname: "Jane Smith",
+	// 		groupid: "G",
+	// 		email: "nobody@gmail.com",
+	// 	},
+	// 	{
+	// 		index_number: "4211228893",
+	// 		fullname: "Michael Johnson",
+	// 		groupid: "B",
+	// 		email: "nobody@gmail.com",
+	// 	},
+	// 	{
+	// 		index_number: "4211238194",
+	// 		fullname: "Emily Williams",
+	// 		groupid: "E",
+	// 		email: "nobody@gmail.com",
+	// 	},
+	// 	{
+	// 		index_number: "4211238890",
+	// 		fullname: "David Brown",
+	// 		groupid: "E",
+	// 		email: "nobody@gmail.com",
+	// 	},
+	// 	{
+	// 		index_number: "4211238891",
+	// 		fullname: "Sarah Davis",
+	// 		groupid: "B",
+	// 		email: "nobody@gmail.com",
+	// 	},
+	// 	{
+	// 		index_number: "4211238892",
+	// 		fullname: "Daniel Wilson",
+	// 		groupid: "A",
+	// 		email: "nobody@gmail.com",
+	// 	},
+	// 	{
+	// 		index_number: "4211238893",
+	// 		fullname: "John Doe",
+	// 		groupid: "B",
+	// 		email: "nobody@gmail.com",
+	// 	},
+	// 	{
+	// 		index_number: "4211238894",
+	// 		fullname: "Jane Smith",
+	// 		groupid: "C",
+	// 		email: "nobody@gmail.com",
+	// 	},
+	// 	{
+	// 		index_number: "4211238895",
+	// 		fullname: "Michael Johnson",
+	// 		groupid: "B",
+	// 		email: "nobody@gmail.com",
+	// 	},
+	// 	{
+	// 		index_number: "4211238896",
+	// 		fullname: "Emily Williams",
+	// 		groupid: "A",
+	// 		email: "nobody@gmail.com",
+	// 	},
+	// 	{
+	// 		index_number: "4211238897",
+	// 		fullname: "David Brown",
+	// 		groupid: "C",
+	// 		email: "nobody@gmail.com",
+	// 	},
+	// 	{
+	// 		index_number: "4211238981",
+	// 		fullname: "Sarah Davis",
+	// 		groupid: "B",
+	// 		email: "nobody@gmail.com",
+	// 	},
+	// 	{
+	// 		index_number: "4211238898",
+	// 		fullname: "Daniel Wilson",
+	// 		groupid: "A",
+	// 		email: "nobody@gmail.com",
+	// 	},
+	// ];
+	// useEffect(() => {
+	// 	localStorage.setItem("students", JSON.stringify(students));
+	// }, []);
+
 	const { role } = useContextProvider();
 	const { getStorageItem } = useFunctions();
 
@@ -32,7 +122,7 @@ const App = () => {
 
 	return (
 		<>
-			{showSideBar && <Sidebar changePage={changePage} page={page} />}
+			{/* {showSideBar && <Sidebar changePage={changePage} page={page} />} */}
 
 			<main>
 				<Header />

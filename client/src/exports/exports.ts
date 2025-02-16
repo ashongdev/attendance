@@ -3,6 +3,8 @@ interface ContextType {
 	role: "Admin" | "Lecturer" | "Student";
 	studentsList: Student[];
 	setStudentsList: Dispatch<SetStateAction<Student[]>>;
+	mode: "edit" | "add" | "list" | "";
+	setMode: Dispatch<SetStateAction<"edit" | "add" | "list" | "">>;
 }
 
 const ContextProvider = createContext<ContextType | undefined>(undefined);
@@ -10,12 +12,11 @@ const ContextProvider = createContext<ContextType | undefined>(undefined);
 type Page = "Home" | "List" | "Attendance" | "Report";
 
 type Student = {
-	no: number;
-	indexNumber: string;
-	fullName: string;
-	groupID: string;
+	index_number: string;
+	fullname: string;
+	groupid: string;
 	email: string;
-	status: boolean;
+	status?: boolean | null;
 };
 
 type GroupID = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "";

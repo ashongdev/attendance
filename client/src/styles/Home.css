@@ -13,7 +13,7 @@
 }
 main {
 	background-color: #f8f8fa;
-	margin-left: 15rem;
+	/* margin-left: 15rem; */
 	min-height: 100vh;
 }
 .alert-container {

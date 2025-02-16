@@ -47,6 +47,7 @@ th {
 td {
 	padding: 1rem;
 	font-size: 1.1rem;
+	/* text-transform: uppercase; */
 }
 td div {
 	display: flex;
@@ -54,7 +55,8 @@ td div {
 	align-items: center;
 	flex-direction: column;
 }
-td:first-child {
+td:first-child,
+td:nth-child(5) {
 	text-align: center;
 }
 td:nth-child(2) {
@@ -79,11 +81,12 @@ td:last-child {
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	z-index: 1;
 }
 form {
 	background-color: white;
 	width: 40%;
-	min-width: 40%;
+	min-width: 20rem;
 	border-radius: 3px;
 	box-shadow: 0px 5px 10px rgba(31, 31, 31, 0.5);
 }

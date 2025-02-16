@@ -1,24 +1,38 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Dispatch, FC, SetStateAction, useEffect } from "react";
+import { Dispatch, FC, SetStateAction } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import useContextProvider from "../hooks/useContextProvider";
-import { GroupID, Student } from "../exports/exports";
+import { Student } from "../exports/exports";
+import useFunctions from "../hooks/useFunctions";
 
 interface Props {
 	setOpenModal: Dispatch<SetStateAction<boolean>>;
 	setShowAlertPopup: Dispatch<SetStateAction<boolean>>;
+	mode: "edit" | "add" | "list" | "";
+	setMode: Dispatch<SetStateAction<"edit" | "add" | "list" | "">>;
+	label: string;
+	editdata?: Omit<Student, "status">;
 }
 
-const AddNewStudent: FC<Props> = ({ setOpenModal, setShowAlertPopup }) => {
+const Form: FC<Props> = ({
+	setOpenModal,
+	setShowAlertPopup,
+	label,
+	setMode,
+	mode,
+	editdata,
+}) => {
+	const { editStudentInfo } = useFunctions();
 	const { studentsList, setStudentsList } = useContextProvider();
+
 	const Schema = yup.object().shape({
-		indexNumber: yup
+		index_number: yup
 			.string()
 			.required()
 			.matches(/^[0-9]{10}$/),
-		fullName: yup.string().required(),
-		groupID: yup
+		fullname: yup.string().required(),
+		groupid: yup
 			.string()
 			.required()
 			.matches(/^[A-H]{1}$/i),
@@ -31,33 +45,44 @@ const AddNewStudent: FC<Props> = ({ setOpenModal, setShowAlertPopup }) => {
 
 	const {
 		register,
-		formState: { errors },
+		// formState: { errors },
 		handleSubmit,
 	} = useForm({
 		resolver: yupResolver(Schema),
 	});
 
-	const addStudent = (data: Omit<Student, "no">) => {
-		const newID =
-			studentsList.length > 0
-				? studentsList[studentsList.length - 1].no + 1
-				: 1;
-		const newStudent = { no: newID, ...data };
-
+	const addStudent = (data: Student) => {
+		const newStudent = data;
 		setStudentsList((prev) => [...prev, newStudent]);
-
 		setShowAlertPopup(true);
 	};
 
-	const submitHandler = async (data: any) => {
-		addStudent(data);
+	const submitHandler = async (data: Omit<Student, "status">) => {
+		if (!data) {
+			setShowAlertPopup(true);
+			alert("No data provided for this provided.");
+			return;
+		}
+
+		mode === "add" && addStudent(data);
+
+		if (!editdata) return alert("No data provided for this provided.");
+		mode === "edit" &&
+			editStudentInfo(
+				editdata.index_number,
+				data,
+				studentsList,
+				setStudentsList
+			);
+		setOpenModal(false);
+		setMode("");
 	};
 
 	return (
 		<div className="modal">
 			<form onSubmit={handleSubmit(submitHandler)}>
 				<div className="header">
-					<p>Add New Student</p>
+					<p>{label}</p>
 				</div>
 
 				<section>
@@ -65,8 +90,13 @@ const AddNewStudent: FC<Props> = ({ setOpenModal, setShowAlertPopup }) => {
 						<label htmlFor="name">Student Name</label>
 						<input
 							type="text"
+							defaultValue={
+								editdata && mode === "edit"
+									? editdata.fullname
+									: ""
+							}
 							placeholder="e.g., Emmanuel Asamoah"
-							{...register("fullName")}
+							{...register("fullname")}
 						/>
 					</div>
 					<div>
@@ -74,21 +104,39 @@ const AddNewStudent: FC<Props> = ({ setOpenModal, setShowAlertPopup }) => {
 						<input
 							type="text"
 							maxLength={10}
+							defaultValue={
+								editdata && mode === "edit"
+									? editdata.index_number
+									: ""
+							}
 							placeholder="e.g., 4211231199"
-							{...register("indexNumber")}
+							{...register("index_number")}
 						/>
 					</div>
 					<div>
 						<label htmlFor="name">Email Address</label>
 						<input
 							type="email"
+							defaultValue={
+								editdata && mode === "edit"
+									? editdata.email
+									: ""
+							}
 							placeholder="e.g., test@example.us"
 							{...register("email")}
 						/>
 					</div>
 					<div>
 						<label htmlFor="name">Group</label>
-						<select id="group" {...register("groupID")}>
+						<select
+							id="group"
+							{...register("groupid")}
+							defaultValue={
+								editdata && mode === "edit"
+									? editdata.groupid
+									: ""
+							}
+						>
 							<option value="">--Select Group--</option>
 							<option value="A">A</option>
 							<option value="B">B</option>
@@ -104,7 +152,10 @@ const AddNewStudent: FC<Props> = ({ setOpenModal, setShowAlertPopup }) => {
 					<button className="actions submit">Submit</button>
 					<button
 						className="actions cancel"
-						onClick={() => setOpenModal(false)}
+						onClick={() => {
+							setMode("");
+							setOpenModal(false);
+						}}
 					>
 						Cancel
 					</button>
@@ -114,4 +165,4 @@ const AddNewStudent: FC<Props> = ({ setOpenModal, setShowAlertPopup }) => {
 	);
 };
 
-export default AddNewStudent;
+export default Form;

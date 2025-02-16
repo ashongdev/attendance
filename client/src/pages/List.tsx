@@ -1,8 +1,8 @@
 import { FC, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import AddNewStudent from "../components/AddNewStudent";
+import Form from "../components/Form";
 import SuccessAlert from "../components/SuccessAlert";
-import { Page } from "../exports/exports";
+import { Page, Student } from "../exports/exports";
 import editIcon from "../images/create-outline.svg";
 import trashCanIcon from "../images/trash-outline.svg";
 import useFunctions from "../hooks/useFunctions";
@@ -13,17 +13,36 @@ interface Props {
 }
 
 const List: FC<Props> = ({ changePage }) => {
-	const { studentsList, setStudentsList } = useContextProvider();
+	const { getStudentsList } = useFunctions();
+	const { studentsList, setStudentsList, mode, setMode } =
+		useContextProvider();
 
 	const [openModal, setOpenModal] = useState(false);
+
 	const [showAlertPopup, setShowAlertPopup] = useState(false);
 
-	const removeStudent = (indexNumber: string) => {
+	const removeStudent = (index_number: string) => {
+		if (studentsList.length <= 0) return;
+
 		const newList = studentsList.filter(
-			(std) => std.indexNumber !== indexNumber
+			(std) => std.index_number !== index_number
 		);
 
 		setStudentsList(newList);
+	};
+
+	const [studentToBeEdited, setStudentToBeEdited] = useState<
+		Omit<Student, "status">
+	>({ fullname: "", index_number: "", groupid: "", email: "" });
+
+	const getStudentInfo = (index_number: string) => {
+		const student = studentsList.find(
+			(std) => std.index_number === index_number
+		);
+
+		if (!student) return;
+
+		setStudentToBeEdited(student);
 	};
 
 	useEffect(() => {
@@ -34,6 +53,10 @@ const List: FC<Props> = ({ changePage }) => {
 			}, 1500);
 		}
 	}, [showAlertPopup]);
+
+	useEffect(() => {
+		getStudentsList(setStudentsList);
+	}, []);
 
 	return (
 		<section className="list-section">
@@ -46,11 +69,27 @@ const List: FC<Props> = ({ changePage }) => {
 						</Link>{" "}
 						{"> "}
 						<Link to="/list">Students</Link>
-						{"> "}
+						{" > "}
+						{studentsList &&
+							studentsList.length > 0 &&
+							studentsList[0].groupid && (
+								<>
+									<Link to="/list">
+										Group {studentsList[0].groupid}
+									</Link>
+									{" > "}
+								</>
+							)}
 					</span>
 				</div>
 
-				<button className="add" onClick={() => setOpenModal(true)}>
+				<button
+					className="add"
+					onClick={() => {
+						setOpenModal(true);
+						setMode("add");
+					}}
+				>
 					<span>+</span> Add New Student
 				</button>
 			</div>
@@ -68,43 +107,61 @@ const List: FC<Props> = ({ changePage }) => {
 						</tr>
 					</thead>
 					<tbody>
-						{studentsList.map((student) => (
-							<tr key={student.no}>
-								<td>{student.no}</td>
-								<td>{student.indexNumber}</td>
-								<td>{student.fullName}</td>
-								<td>{student.email}</td>
-								<td>{student.groupID}</td>
-								<td>
-									<button>
-										<img
-											src={editIcon}
-											className="action-icon"
-											alt="edit-icon"
-										/>
-									</button>
-									<button
-										onClick={() =>
-											removeStudent(student.indexNumber)
-										}
-									>
-										<img
-											src={trashCanIcon}
-											className="action-icon"
-											alt="delete-icon"
-										/>
-									</button>
-								</td>
-							</tr>
-						))}
+						{studentsList &&
+							studentsList.length > 0 &&
+							studentsList.map((student, index) => (
+								<tr key={student.index_number}>
+									<td>{index + 1}</td>
+									<td>{student.index_number}</td>
+									<td>{student.fullname}</td>
+									<td>{student.email}</td>
+									<td>{student.groupid}</td>
+									<td>
+										<button
+											onClick={() => {
+												setOpenModal(true);
+												setMode("edit");
+												getStudentInfo(
+													student.index_number
+												);
+											}}
+										>
+											<img
+												src={editIcon}
+												className="action-icon"
+												alt="edit-icon"
+											/>
+										</button>
+										<button
+											onClick={() => {
+												removeStudent(
+													student.index_number
+												);
+											}}
+										>
+											<img
+												src={trashCanIcon}
+												className="action-icon"
+												alt="delete-icon"
+											/>
+										</button>
+									</td>
+								</tr>
+							))}
 					</tbody>
 				</table>
 			</div>
 
 			{openModal && (
-				<AddNewStudent
+				<Form
 					setOpenModal={setOpenModal}
 					setShowAlertPopup={setShowAlertPopup}
+					setMode={setMode}
+					mode={"edit"}
+					label={
+						mode === "add" ? "Add New Student" : "Edit Student Info"
+					}
+					editdata={studentToBeEdited}
 				/>
 			)}
 
