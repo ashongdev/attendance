@@ -7,7 +7,7 @@ import useFunctions from "../hooks/useFunctions";
 import useContextProvider from "../hooks/useContextProvider";
 
 const Dashboard = () => {
-	const { studentsList, mode, setMode } = useContextProvider();
+	const { studentsList } = useContextProvider();
 	const { getStorageItem } = useFunctions();
 	const [totalPresent, setTotalPresent] = useState(0);
 	const [totalAbsent, setTotalAbsent] = useState(0);

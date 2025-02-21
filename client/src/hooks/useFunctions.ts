@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction } from "react";
 import * as XLSX from "xlsx";
 import Axios from "axios";
-import { Student } from "../exports/exports";
+import { Mode, Student } from "../exports/exports";
 
 const useFunctions = () => {
 	const getStorageItem = (
@@ -24,7 +24,10 @@ const useFunctions = () => {
 		index_number: string,
 		data: Omit<Student, "status">,
 		getter: Student[],
-		setter: Dispatch<SetStateAction<Student[]>>
+		valueSetter: Dispatch<SetStateAction<Student[]>>,
+		modalSetter: Dispatch<SetStateAction<boolean>>,
+		alertPopupSetter: Dispatch<SetStateAction<boolean>>,
+		modeSetter: Dispatch<SetStateAction<Mode>>
 	) => {
 		try {
 			const student = getter.filter(
@@ -38,9 +41,15 @@ const useFunctions = () => {
 			);
 
 			if (!res.data) return alert("An unexpected error occured");
-			setter(res.data);
+			valueSetter(res.data);
+
+			modalSetter(false);
+			setTimeout(() => {
+				modeSetter("");
+			}, 2000);
+			alertPopupSetter(true);
 		} catch (error) {
-			// console.log("🚀 ~ useFunctions ~ error:", error);
+			console.log("🚀 ~ useFunctions ~ error:", error);
 			alert("An unexpected error occured");
 			return;
 		}
@@ -60,7 +69,44 @@ const useFunctions = () => {
 
 			setter(res.data);
 		} catch (error) {
-			// console.log("🚀 ~ getStudentsList ~ error:", error);
+			console.log("🚀 ~ getStudentsList ~ error:", error);
+			return;
+		}
+	};
+
+	const addStudent = async (
+		data: Student,
+		alertPopupSetter: Dispatch<SetStateAction<boolean>>,
+		valueSetter: Dispatch<SetStateAction<Student[]>>,
+		modalSetter: Dispatch<SetStateAction<boolean>>,
+		modeSetter: Dispatch<SetStateAction<Mode>>,
+		errorPopupSetter: Dispatch<SetStateAction<boolean>>,
+		errorSetter: Dispatch<
+			SetStateAction<{ header: string; description: string }>
+		>
+	) => {
+		try {
+			const res = await Axios.post(
+				"http://localhost:4002/lec/add-student",
+				data
+			);
+
+			if (!res.data) {
+				alertPopupSetter(false);
+				return alert("An unexpected error occurred.");
+			}
+			valueSetter(res.data);
+			alertPopupSetter(true);
+
+			modalSetter(false);
+
+			setTimeout(() => {
+				modeSetter("");
+			}, 2000);
+		} catch (error: any) {
+			const { msg } = error.response.data;
+			errorPopupSetter(true);
+			errorSetter({ header: "Duplicate Entry", description: msg });
 			return;
 		}
 	};
@@ -105,9 +151,47 @@ const useFunctions = () => {
 	// 	}
 	// };
 
+	const removeStudent = async (
+		index_number: string,
+		errorPopupSetter: Dispatch<SetStateAction<boolean>>,
+		errorSetter: Dispatch<
+			SetStateAction<{ header: string; description: string }>
+		>,
+		valueSetter: Dispatch<SetStateAction<Student[]>>,
+		modalSetter: Dispatch<SetStateAction<boolean>>,
+		modeSetter: Dispatch<SetStateAction<Mode>>,
+		alertPopupSetter: Dispatch<SetStateAction<boolean>>
+	) => {
+		try {
+			const res = await Axios.delete(
+				`http://localhost:4002/lec/rem-student/${index_number}`
+			);
+			if (!res.data) {
+				return alert("⚠️ An unexpected error occurred!");
+			}
+
+			valueSetter(res.data);
+			alertPopupSetter(true);
+
+			modalSetter(false);
+			setTimeout(() => {
+				modeSetter("");
+			}, 2000);
+		} catch (error: any) {
+			const { msg } = error.response.data;
+			errorPopupSetter(true);
+			errorSetter({ header: "Duplicate Entry", description: msg });
+		}
+	};
 	const storedStudentList = getStorageItem("studentList", null);
 
-	return { getStorageItem, getStudentsList, editStudentInfo };
+	return {
+		getStorageItem,
+		getStudentsList,
+		editStudentInfo,
+		addStudent,
+		removeStudent,
+	};
 };
 
 export default useFunctions;

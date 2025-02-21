@@ -3,27 +3,31 @@ import { Dispatch, FC, SetStateAction } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import useContextProvider from "../hooks/useContextProvider";
-import { Student } from "../exports/exports";
+import { Mode, Student } from "../exports/exports";
 import useFunctions from "../hooks/useFunctions";
 
 interface Props {
 	setOpenModal: Dispatch<SetStateAction<boolean>>;
 	setShowAlertPopup: Dispatch<SetStateAction<boolean>>;
-	mode: "edit" | "add" | "list" | "";
-	setMode: Dispatch<SetStateAction<"edit" | "add" | "list" | "">>;
+	setShowErrorMessage: Dispatch<SetStateAction<boolean>>;
+	mode: Mode;
+	setMode: Dispatch<SetStateAction<Mode>>;
 	label: string;
 	editdata?: Omit<Student, "status">;
+	setError: Dispatch<SetStateAction<{ header: string; description: string }>>;
 }
 
 const Form: FC<Props> = ({
 	setOpenModal,
 	setShowAlertPopup,
+	setShowErrorMessage,
 	label,
 	setMode,
 	mode,
 	editdata,
+	setError,
 }) => {
-	const { editStudentInfo } = useFunctions();
+	const { editStudentInfo, addStudent } = useFunctions();
 	const { studentsList, setStudentsList } = useContextProvider();
 
 	const Schema = yup.object().shape({
@@ -51,36 +55,40 @@ const Form: FC<Props> = ({
 		resolver: yupResolver(Schema),
 	});
 
-	const addStudent = (data: Student) => {
-		const newStudent = data;
-		setStudentsList((prev) => [...prev, newStudent]);
-		setShowAlertPopup(true);
-	};
-
 	const submitHandler = async (data: Omit<Student, "status">) => {
 		if (!data) {
-			setShowAlertPopup(true);
 			alert("No data provided for this provided.");
 			return;
 		}
 
-		mode === "add" && addStudent(data);
-
 		if (!editdata) return alert("No data provided for this provided.");
-		mode === "edit" &&
+
+		if (mode === "add") {
+			addStudent(
+				data,
+				setShowAlertPopup,
+				setStudentsList,
+				setOpenModal,
+				setMode,
+				setShowErrorMessage,
+				setError
+			);
+		} else if (mode === "edit") {
 			editStudentInfo(
 				editdata.index_number,
 				data,
 				studentsList,
-				setStudentsList
+				setStudentsList,
+				setOpenModal,
+				setShowAlertPopup,
+				setMode
 			);
-		setOpenModal(false);
-		setMode("");
+		}
 	};
 
 	return (
 		<div className="modal">
-			<form onSubmit={handleSubmit(submitHandler)}>
+			<form onSubmit={handleSubmit(submitHandler)} className="cont">
 				<div className="header">
 					<p>{label}</p>
 				</div>
@@ -91,8 +99,8 @@ const Form: FC<Props> = ({
 						<input
 							type="text"
 							defaultValue={
-								editdata && mode === "edit"
-									? editdata.fullname
+								mode === "edit"
+									? editdata && editdata.fullname
 									: ""
 							}
 							placeholder="e.g., Emmanuel Asamoah"
@@ -105,8 +113,8 @@ const Form: FC<Props> = ({
 							type="text"
 							maxLength={10}
 							defaultValue={
-								editdata && mode === "edit"
-									? editdata.index_number
+								mode === "edit"
+									? editdata && editdata.index_number
 									: ""
 							}
 							placeholder="e.g., 4211231199"
@@ -118,8 +126,8 @@ const Form: FC<Props> = ({
 						<input
 							type="email"
 							defaultValue={
-								editdata && mode === "edit"
-									? editdata.email
+								mode === "edit"
+									? editdata && editdata.email
 									: ""
 							}
 							placeholder="e.g., test@example.us"
@@ -132,8 +140,8 @@ const Form: FC<Props> = ({
 							id="group"
 							{...register("groupid")}
 							defaultValue={
-								editdata && mode === "edit"
-									? editdata.groupid
+								mode === "edit"
+									? editdata && editdata.groupid
 									: ""
 							}
 						>
@@ -153,7 +161,9 @@ const Form: FC<Props> = ({
 					<button
 						className="actions cancel"
 						onClick={() => {
-							setMode("");
+							setTimeout(() => {
+								setMode("");
+							}, 2000);
 							setOpenModal(false);
 						}}
 					>

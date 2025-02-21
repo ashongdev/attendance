@@ -25,6 +25,7 @@ main {
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	z-index: 2;
 }
 .alert-content {
 	padding: 1rem;
@@ -51,6 +52,8 @@ main {
 .alert-description {
 	font-size: 0.8rem;
 	margin-top: 0.2rem;
+	font-weight: normal;
+	font-size: 0.7rem;
 }
 .icon-container .icon,
 .close {

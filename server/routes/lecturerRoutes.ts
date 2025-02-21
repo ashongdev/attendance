@@ -4,6 +4,8 @@ import {
 	authenticate,
 	getStudents,
 	editStudentInfo,
+	addStudent,
+	removeStudent,
 } from "../controllers/lecturerController";
 
 export const router = Router();
@@ -21,6 +23,8 @@ router.get("/lec/auth/:key", authenticate);
 router.get("/lec/students", getStudents);
 
 router.post("/lec/get-students", getStudents);
+router.post("/lec/add-student", addStudent);
+router.delete("/lec/rem-student/:id", removeStudent);
 
 // router.post("/register-course", registerCourse);
 router.patch("/lec/edit", editStudentInfo);

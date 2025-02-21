@@ -1,11 +1,13 @@
-import { Dispatch, FC, SetStateAction, useState } from "react";
+import { Dispatch, FC, SetStateAction } from "react";
 import checkmark from "../images/checkmark.png";
+import useContextProvider from "../hooks/useContextProvider";
 
 interface Props {
-	// successMessage: string;
 	setShowAlertPopup: Dispatch<SetStateAction<boolean>>;
 }
 const SuccessAlert: FC<Props> = ({ setShowAlertPopup }) => {
+	const { mode } = useContextProvider();
+
 	return (
 		<div className="alert-container">
 			<div className="alert-content">
@@ -16,7 +18,10 @@ const SuccessAlert: FC<Props> = ({ setShowAlertPopup }) => {
 				<div className="alert-text">
 					<p className="alert-title">Success</p>
 					<p className="alert-description">
-						Student has been successfully added!
+						Student {mode === "edit" && "info"} has been
+						succcessfully {mode === "edit" ? "updated" : ""}
+						{mode === "del" ? "removed" : ""}
+						{mode === "add" ? "added" : ""}!
 					</p>
 				</div>
 

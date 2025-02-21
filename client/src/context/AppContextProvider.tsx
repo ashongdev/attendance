@@ -1,7 +1,7 @@
 import Axios from "axios";
 import { ReactNode, useEffect, useState } from "react";
 import io from "socket.io-client";
-import { ContextProvider, Student } from "../exports/exports";
+import { ContextProvider, Mode, Student } from "../exports/exports";
 import useFunctions from "../hooks/useFunctions";
 
 // const socket = io("http://localhost:4000");
@@ -21,7 +21,7 @@ const Context = ({ children }: { children: ReactNode }) => {
 	]);
 
 	const role: "Admin" | "Lecturer" | "Student" = getStorageItem("role", null);
-	const [mode, setMode] = useState<"edit" | "add" | "list" | "">("");
+	const [mode, setMode] = useState<Mode>("");
 
 	return (
 		<ContextProvider.Provider

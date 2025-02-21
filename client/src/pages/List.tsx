@@ -7,6 +7,8 @@ import editIcon from "../images/create-outline.svg";
 import trashCanIcon from "../images/trash-outline.svg";
 import useFunctions from "../hooks/useFunctions";
 import useContextProvider from "../hooks/useContextProvider";
+import ErrorAlert from "../components/ErrorAlert";
+import Confirm from "../components/ConfirmationModal";
 
 interface Props {
 	changePage: (val: Page) => void;
@@ -19,17 +21,12 @@ const List: FC<Props> = ({ changePage }) => {
 
 	const [openModal, setOpenModal] = useState(false);
 
+	const [showErrorMessage, setShowErrorMessage] = useState(false);
 	const [showAlertPopup, setShowAlertPopup] = useState(false);
-
-	const removeStudent = (index_number: string) => {
-		if (studentsList.length <= 0) return;
-
-		const newList = studentsList.filter(
-			(std) => std.index_number !== index_number
-		);
-
-		setStudentsList(newList);
-	};
+	const [error, setError] = useState({
+		header: "",
+		description: "",
+	});
 
 	const [studentToBeEdited, setStudentToBeEdited] = useState<
 		Omit<Student, "status">
@@ -50,9 +47,15 @@ const List: FC<Props> = ({ changePage }) => {
 			setOpenModal(false);
 			setTimeout(() => {
 				setShowAlertPopup(false);
-			}, 1500);
+			}, 2000);
 		}
-	}, [showAlertPopup]);
+
+		if (showErrorMessage) {
+			setTimeout(() => {
+				setShowErrorMessage(false);
+			}, 2000);
+		}
+	}, [showAlertPopup, showErrorMessage]);
 
 	useEffect(() => {
 		getStudentsList(setStudentsList);
@@ -60,6 +63,18 @@ const List: FC<Props> = ({ changePage }) => {
 
 	return (
 		<section className="list-section">
+			{openModal && mode === "del" && (
+				<Confirm
+					setOpenModal={setOpenModal}
+					setShowAlertPopup={setShowAlertPopup}
+					setShowErrorMessage={setShowErrorMessage}
+					setMode={setMode}
+					mode={mode}
+					editdata={studentToBeEdited}
+					setError={setError}
+				/>
+			)}
+
 			<p>Students</p>
 			<div className="top">
 				<div>
@@ -86,8 +101,8 @@ const List: FC<Props> = ({ changePage }) => {
 				<button
 					className="add"
 					onClick={() => {
-						setOpenModal(true);
 						setMode("add");
+						setOpenModal(true);
 					}}
 				>
 					<span>+</span> Add New Student
@@ -134,9 +149,11 @@ const List: FC<Props> = ({ changePage }) => {
 										</button>
 										<button
 											onClick={() => {
-												removeStudent(
+												setMode("del");
+												getStudentInfo(
 													student.index_number
 												);
+												setOpenModal(true);
 											}}
 										>
 											<img
@@ -152,21 +169,30 @@ const List: FC<Props> = ({ changePage }) => {
 				</table>
 			</div>
 
-			{openModal && (
+			{openModal && (mode === "add" || mode === "edit") && (
 				<Form
 					setOpenModal={setOpenModal}
 					setShowAlertPopup={setShowAlertPopup}
+					setShowErrorMessage={setShowErrorMessage}
 					setMode={setMode}
-					mode={"edit"}
+					mode={mode}
 					label={
 						mode === "add" ? "Add New Student" : "Edit Student Info"
 					}
 					editdata={studentToBeEdited}
+					setError={setError}
 				/>
 			)}
 
 			{showAlertPopup && (
 				<SuccessAlert setShowAlertPopup={setShowAlertPopup} />
+			)}
+
+			{showErrorMessage && (
+				<ErrorAlert
+					error={error}
+					setShowErrorMessage={setShowErrorMessage}
+				/>
 			)}
 		</section>
 	);

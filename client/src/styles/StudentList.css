@@ -83,25 +83,34 @@ td:last-child {
 	align-items: center;
 	z-index: 1;
 }
-form {
+.modal .cont {
 	background-color: white;
 	width: 40%;
 	min-width: 20rem;
 	border-radius: 3px;
 	box-shadow: 0px 5px 10px rgba(31, 31, 31, 0.5);
 }
-form .header {
+.modal .header {
 	padding: 1rem;
 	border-bottom: 1px solid #d0d9e7;
 }
-form .header p {
+
+.modal .header p {
 	color: #44475f;
 }
-form section div {
+.modal section div {
 	margin-bottom: 1rem;
 }
 label {
 	display: block;
+}
+label.details {
+	margin-bottom: 0.5rem;
+	font-weight: bold;
+	text-decoration: underline;
+}
+.details span {
+	font-weight: normal;
 }
 input,
 select {
