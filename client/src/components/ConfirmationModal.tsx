@@ -9,7 +9,6 @@ import useFunctions from "../hooks/useFunctions";
 import ErrorAlert from "./ErrorAlert";
 
 interface Props {
-	setOpenModal: Dispatch<SetStateAction<boolean>>;
 	setShowAlertPopup: Dispatch<SetStateAction<boolean>>;
 	setShowErrorMessage: Dispatch<SetStateAction<boolean>>;
 	mode: Mode;
@@ -19,16 +18,14 @@ interface Props {
 }
 
 const Confirm: FC<Props> = ({
-	setOpenModal,
 	setShowAlertPopup,
 	setShowErrorMessage,
 	setMode,
-	mode,
 	editdata,
 	setError,
 }) => {
 	const { removeStudent } = useFunctions();
-	const { studentsList, setStudentsList } = useContextProvider();
+	const { setOpenModal, setStudentsList } = useContextProvider();
 
 	const Schema = yup.object().shape({
 		index_number: yup

@@ -20,6 +20,22 @@ const useFunctions = () => {
 		}
 	};
 
+	const setterFunc = (
+		valueSetter: Dispatch<SetStateAction<Student[]>>,
+		modalSetter: Dispatch<SetStateAction<boolean>>,
+		alertPopupSetter: Dispatch<SetStateAction<boolean>>,
+		modeSetter: Dispatch<SetStateAction<Mode>>,
+		res: any
+	) => {
+		valueSetter(res.data);
+
+		modalSetter(false);
+		setTimeout(() => {
+			modeSetter("");
+		}, 2000);
+		alertPopupSetter(true);
+	};
+
 	const editStudentInfo = async (
 		index_number: string,
 		data: Omit<Student, "status">,
@@ -41,13 +57,13 @@ const useFunctions = () => {
 			);
 
 			if (!res.data) return alert("An unexpected error occured");
-			valueSetter(res.data);
-
-			modalSetter(false);
-			setTimeout(() => {
-				modeSetter("");
-			}, 2000);
-			alertPopupSetter(true);
+			setterFunc(
+				valueSetter,
+				modalSetter,
+				alertPopupSetter,
+				modeSetter,
+				res
+			);
 		} catch (error) {
 			console.log("🚀 ~ useFunctions ~ error:", error);
 			alert("An unexpected error occured");
@@ -58,7 +74,11 @@ const useFunctions = () => {
 	const currentDate = new Date().toLocaleString();
 
 	const getStudentsList = async (
-		setter: Dispatch<SetStateAction<Student[]>>
+		setter: Dispatch<SetStateAction<Student[]>>,
+		errorPopupSetter: Dispatch<SetStateAction<boolean>>,
+		errorSetter: Dispatch<
+			SetStateAction<{ header: string; description: string }>
+		>
 	) => {
 		try {
 			const res = await Axios.get("http://localhost:4002/lec/students");
@@ -68,7 +88,21 @@ const useFunctions = () => {
 			}
 
 			setter(res.data);
-		} catch (error) {
+		} catch (error: any) {
+			console.log("CODE: ", error);
+			errorPopupSetter(true);
+			if (error.status === 429) {
+				errorSetter({
+					header: "Could not retrieve data",
+					description: "Too many requests, please try again later.",
+				});
+			} else {
+				errorSetter({
+					header: "An unexpected error occurred.",
+					description: "Please try again.",
+				});
+			}
+
 			console.log("🚀 ~ getStudentsList ~ error:", error);
 			return;
 		}
@@ -95,14 +129,13 @@ const useFunctions = () => {
 				alertPopupSetter(false);
 				return alert("An unexpected error occurred.");
 			}
-			valueSetter(res.data);
-			alertPopupSetter(true);
-
-			modalSetter(false);
-
-			setTimeout(() => {
-				modeSetter("");
-			}, 2000);
+			setterFunc(
+				valueSetter,
+				modalSetter,
+				alertPopupSetter,
+				modeSetter,
+				res
+			);
 		} catch (error: any) {
 			const { msg } = error.response.data;
 			errorPopupSetter(true);
@@ -170,13 +203,13 @@ const useFunctions = () => {
 				return alert("⚠️ An unexpected error occurred!");
 			}
 
-			valueSetter(res.data);
-			alertPopupSetter(true);
-
-			modalSetter(false);
-			setTimeout(() => {
-				modeSetter("");
-			}, 2000);
+			setterFunc(
+				valueSetter,
+				modalSetter,
+				alertPopupSetter,
+				modeSetter,
+				res
+			);
 		} catch (error: any) {
 			const { msg } = error.response.data;
 			errorPopupSetter(true);

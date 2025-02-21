@@ -5,6 +5,22 @@ interface ContextType {
 	setStudentsList: Dispatch<SetStateAction<Student[]>>;
 	mode: Mode;
 	setMode: Dispatch<SetStateAction<Mode>>;
+	showErrorMessage: boolean;
+	setShowErrorMessage: Dispatch<SetStateAction<boolean>>;
+	showAlertPopup: boolean;
+	setShowAlertPopup: Dispatch<SetStateAction<boolean>>;
+	error: {
+		header: string;
+		description: string;
+	};
+	setError: Dispatch<
+		SetStateAction<{
+			header: string;
+			description: string;
+		}>
+	>;
+	openModal: boolean;
+	setOpenModal: Dispatch<SetStateAction<boolean>>;
 }
 
 const ContextProvider = createContext<ContextType | undefined>(undefined);

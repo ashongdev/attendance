@@ -7,7 +7,6 @@ import { Mode, Student } from "../exports/exports";
 import useFunctions from "../hooks/useFunctions";
 
 interface Props {
-	setOpenModal: Dispatch<SetStateAction<boolean>>;
 	setShowAlertPopup: Dispatch<SetStateAction<boolean>>;
 	setShowErrorMessage: Dispatch<SetStateAction<boolean>>;
 	mode: Mode;
@@ -18,7 +17,6 @@ interface Props {
 }
 
 const Form: FC<Props> = ({
-	setOpenModal,
 	setShowAlertPopup,
 	setShowErrorMessage,
 	label,
@@ -28,7 +26,8 @@ const Form: FC<Props> = ({
 	setError,
 }) => {
 	const { editStudentInfo, addStudent } = useFunctions();
-	const { studentsList, setStudentsList } = useContextProvider();
+	const { studentsList, setStudentsList, setOpenModal } =
+		useContextProvider();
 
 	const Schema = yup.object().shape({
 		index_number: yup

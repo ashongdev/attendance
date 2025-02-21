@@ -10,18 +10,32 @@ import useFunctions from "../hooks/useFunctions";
 const Context = ({ children }: { children: ReactNode }) => {
 	const { getStorageItem } = useFunctions();
 
-	const [studentsList, setStudentsList] = useState<Student[]>([
-		{
-			index_number: "",
-			fullname: "",
-			groupid: "",
-			email: "",
-			status: null,
-		},
-	]);
+	const [studentsList, setStudentsList] = useState<Student[]>([]);
 
 	const role: "Admin" | "Lecturer" | "Student" = getStorageItem("role", null);
 	const [mode, setMode] = useState<Mode>("");
+	const [showErrorMessage, setShowErrorMessage] = useState(false);
+	const [showAlertPopup, setShowAlertPopup] = useState(false);
+	const [error, setError] = useState({
+		header: "",
+		description: "",
+	});
+	const [openModal, setOpenModal] = useState(false);
+
+	useEffect(() => {
+		if (showAlertPopup) {
+			setOpenModal(false);
+			setTimeout(() => {
+				setShowAlertPopup(false);
+			}, 2000);
+		}
+
+		if (showErrorMessage) {
+			setTimeout(() => {
+				setShowErrorMessage(false);
+			}, 2000);
+		}
+	}, [showAlertPopup, showErrorMessage]);
 
 	return (
 		<ContextProvider.Provider
@@ -31,6 +45,14 @@ const Context = ({ children }: { children: ReactNode }) => {
 				setStudentsList,
 				mode,
 				setMode,
+				showErrorMessage,
+				setShowErrorMessage,
+				showAlertPopup,
+				setShowAlertPopup,
+				error,
+				setError,
+				openModal,
+				setOpenModal,
 			}}
 		>
 			{children}

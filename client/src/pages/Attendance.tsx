@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { GroupID, Page, Status, Student } from "../exports/exports";
 import useFunctions from "../hooks/useFunctions";
 import useContextProvider from "../hooks/useContextProvider";
+import ErrorAlert from "../components/ErrorAlert";
 
 interface Props {
 	changePage: (val: Page) => void;
@@ -10,10 +11,16 @@ interface Props {
 
 const Attendance: FC<Props> = ({ changePage }) => {
 	const { getStudentsList } = useFunctions();
-	const { studentsList, setStudentsList } = useContextProvider();
+	const {
+		studentsList,
+		setStudentsList,
+		setShowErrorMessage,
+		showErrorMessage,
+		setError,
+		error,
+	} = useContextProvider();
 
 	const [clickedStudent, setClickedStudent] = useState("");
-	// const [showAlertPopup, setShowAlertPopup] = useState(false);
 	const [filterGroupID, setFilterGroupID] = useState<GroupID>("");
 	const [filteredStudentList, setFilterStudentList] = useState<Student[]>([]);
 	const [studentStatus, setStudentStatus] = useState<Status | null>(null);
@@ -52,7 +59,10 @@ const Attendance: FC<Props> = ({ changePage }) => {
 	}, [filterGroupID]);
 
 	useEffect(() => {
-		getStudentsList(setStudentsList);
+		// for (let i = 0; i < 105; i++) {
+		// console.log(i);
+		getStudentsList(setStudentsList, setShowErrorMessage, setError);
+		// }
 	}, []);
 
 	return (
@@ -129,7 +139,8 @@ const Attendance: FC<Props> = ({ changePage }) => {
 					</thead>
 					<tbody>
 						{filteredStudentList.length <= 0
-							? studentsList.map((student, index) => (
+							? studentsList.length > 0 &&
+							  studentsList.map((student, index) => (
 									<tr key={student.index_number}>
 										<td>{index + 1}</td>
 										<td>{student.index_number}</td>
@@ -218,6 +229,13 @@ const Attendance: FC<Props> = ({ changePage }) => {
 					</tbody>
 				</table>
 			</div>
+
+			{showErrorMessage && (
+				<ErrorAlert
+					error={error}
+					setShowErrorMessage={setShowErrorMessage}
+				/>
+			)}
 		</section>
 	);
 };

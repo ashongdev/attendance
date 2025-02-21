@@ -16,17 +16,20 @@ interface Props {
 
 const List: FC<Props> = ({ changePage }) => {
 	const { getStudentsList } = useFunctions();
-	const { studentsList, setStudentsList, mode, setMode } =
-		useContextProvider();
-
-	const [openModal, setOpenModal] = useState(false);
-
-	const [showErrorMessage, setShowErrorMessage] = useState(false);
-	const [showAlertPopup, setShowAlertPopup] = useState(false);
-	const [error, setError] = useState({
-		header: "",
-		description: "",
-	});
+	const {
+		studentsList,
+		setStudentsList,
+		mode,
+		setMode,
+		showAlertPopup,
+		setShowAlertPopup,
+		setShowErrorMessage,
+		showErrorMessage,
+		setError,
+		error,
+		openModal,
+		setOpenModal,
+	} = useContextProvider();
 
 	const [studentToBeEdited, setStudentToBeEdited] = useState<
 		Omit<Student, "status">
@@ -43,29 +46,13 @@ const List: FC<Props> = ({ changePage }) => {
 	};
 
 	useEffect(() => {
-		if (showAlertPopup) {
-			setOpenModal(false);
-			setTimeout(() => {
-				setShowAlertPopup(false);
-			}, 2000);
-		}
-
-		if (showErrorMessage) {
-			setTimeout(() => {
-				setShowErrorMessage(false);
-			}, 2000);
-		}
-	}, [showAlertPopup, showErrorMessage]);
-
-	useEffect(() => {
-		getStudentsList(setStudentsList);
+		getStudentsList(setStudentsList, setShowErrorMessage, setError);
 	}, []);
 
 	return (
 		<section className="list-section">
 			{openModal && mode === "del" && (
 				<Confirm
-					setOpenModal={setOpenModal}
 					setShowAlertPopup={setShowAlertPopup}
 					setShowErrorMessage={setShowErrorMessage}
 					setMode={setMode}
@@ -171,7 +158,6 @@ const List: FC<Props> = ({ changePage }) => {
 
 			{openModal && (mode === "add" || mode === "edit") && (
 				<Form
-					setOpenModal={setOpenModal}
 					setShowAlertPopup={setShowAlertPopup}
 					setShowErrorMessage={setShowErrorMessage}
 					setMode={setMode}

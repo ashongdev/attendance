@@ -8,7 +8,7 @@ import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 import Dashboard from "./pages/Dashboard";
 import Attendance from "./pages/Attendance";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import useFunctions from "./hooks/useFunctions.ts";
 import { Page } from "./exports/exports.ts";
 
@@ -122,10 +122,12 @@ const App = () => {
 
 	return (
 		<>
-			{/* {showSideBar && <Sidebar changePage={changePage} page={page} />} */}
+			{showSideBar && <Sidebar changePage={changePage} page={page} />}
 
-			<main>
-				<Header />
+			{/* Add the slide in animations */}
+			{/* Add Loading animations for operations performed: fetching students, updating, removing etc */}
+			<main style={{ marginLeft: showSideBar ? "15rem" : "0rem" }}>
+				<Header setShowSideBar={setShowSideBar} />
 
 				<Routes>
 					<Route
@@ -140,7 +142,9 @@ const App = () => {
 						path="/list"
 						element={
 							<PublicRoute role={role}>
+								{/* <Loading> */}
 								<List changePage={changePage} />
+								{/* </Loading> */}
 							</PublicRoute>
 						}
 					/>
