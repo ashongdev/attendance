@@ -100,14 +100,12 @@ const removeStudent = async (req: Request, res: Response) => {
 	}
 
 	try {
-		const sql = await pool.query(
-			`DELETE FROM STUDENTS WHERE INDEX_NUMBER = $1`,
-			[id]
-		);
+		await pool.query(`DELETE FROM STUDENTS WHERE INDEX_NUMBER = $1`, [id]);
 
 		getStudents(req, res);
 	} catch (error) {
 		console.log("🚀 ~ removeStudent ~ error:", error);
+		res.status(403).json(error);
 	}
 
 	console.log("Removed", id);
