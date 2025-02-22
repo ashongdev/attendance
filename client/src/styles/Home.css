@@ -60,3 +60,14 @@ main {
 	height: 1.5rem;
 	width: 1.5rem;
 }
+
+/* Signin */
+.signin-cont {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-top: 3rem;
+}
+.signin-cont form {
+	width: 30rem;
+}

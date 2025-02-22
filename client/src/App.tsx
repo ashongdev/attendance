@@ -1,16 +1,15 @@
-import { Navigate, Route, Routes } from "react-router-dom";
-import Footer from "./components/Footer";
-import useContextProvider from "./hooks/useContextProvider";
-import { ProtectedRoute, PublicRoute } from "./hooks/useRouteFunctions";
-import List from "./pages/List";
-import Sidebar from "./components/Sidebar";
-
-import Header from "./components/Header";
-import Dashboard from "./pages/Dashboard";
-import Attendance from "./pages/Attendance";
 import { useState } from "react";
-import useFunctions from "./hooks/useFunctions.ts";
+import { Route, Routes } from "react-router-dom";
+import Header from "./components/Header";
+import Sidebar from "./components/Sidebar";
 import { Page } from "./exports/exports.ts";
+import useContextProvider from "./hooks/useContextProvider";
+import useFunctions from "./hooks/useFunctions.ts";
+import { PublicRoute } from "./hooks/useRouteFunctions";
+import Attendance from "./pages/Attendance";
+import Dashboard from "./pages/Dashboard";
+import LecSignIn from "./pages/LecSignIn";
+import List from "./pages/List";
 
 // !Download Oh MY ZSH for my terminal
 // todo: Add loader styles to css
@@ -153,6 +152,14 @@ const App = () => {
 						element={
 							<PublicRoute role={role}>
 								<Attendance changePage={changePage} />
+							</PublicRoute>
+						}
+					/>
+					<Route
+						path="/signin"
+						element={
+							<PublicRoute role={role}>
+								<LecSignIn />
 							</PublicRoute>
 						}
 					/>

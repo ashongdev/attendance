@@ -36,8 +36,17 @@ type Student = {
 	status?: boolean | null;
 };
 
+type Lecturer = {
+	id: string;
+	fullname: string;
+	no_of_groups: number;
+	email: string;
+	faculty: string;
+	// department: string;
+};
+
 type GroupID = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "";
 
 type Status = "Present" | "Absent";
 
-export { ContextProvider, Page, Student, GroupID, Status, Mode };
+export { ContextProvider, GroupID, Lecturer, Mode, Page, Status, Student };

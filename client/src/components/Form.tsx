@@ -2,8 +2,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Dispatch, FC, SetStateAction } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import useContextProvider from "../hooks/useContextProvider";
 import { Mode, Student } from "../exports/exports";
+import useContextProvider from "../hooks/useContextProvider";
 import useFunctions from "../hooks/useFunctions";
 
 interface Props {

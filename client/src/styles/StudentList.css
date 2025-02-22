@@ -98,7 +98,8 @@ td:last-child {
 .modal .header p {
 	color: #44475f;
 }
-.modal section div {
+.modal section div,
+.block {
 	margin-bottom: 1rem;
 }
 label {
