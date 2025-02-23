@@ -8,7 +8,7 @@ import useFunctions from "./hooks/useFunctions.ts";
 import { PublicRoute } from "./hooks/useRouteFunctions";
 import Attendance from "./pages/Attendance";
 import Dashboard from "./pages/Dashboard";
-import LecSignIn from "./pages/LecSignIn";
+import LecSignup from "./pages/LecSignup.tsx";
 import List from "./pages/List";
 
 // !Download Oh MY ZSH for my terminal
@@ -112,7 +112,7 @@ const App = () => {
 	const { getStorageItem } = useFunctions();
 
 	const [page, setPage] = useState<Page>(getStorageItem("page", null));
-	const [showSideBar, setShowSideBar] = useState(true);
+	const [showSideBar, setShowSideBar] = useState(false);
 
 	const changePage = (page: Page) => {
 		setPage(page);
@@ -156,10 +156,10 @@ const App = () => {
 						}
 					/>
 					<Route
-						path="/signin"
+						path="/signup"
 						element={
 							<PublicRoute role={role}>
-								<LecSignIn />
+								<LecSignup />
 							</PublicRoute>
 						}
 					/>

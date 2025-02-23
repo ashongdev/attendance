@@ -37,12 +37,19 @@ type Student = {
 };
 
 type Lecturer = {
-	id: string;
-	fullname: string;
+	confirmPassword: string;
+	password: string;
+	group1?: string;
+	group2?: string;
+	group3?: string;
+	group4?: string;
 	no_of_groups: number;
-	email: string;
 	faculty: string;
-	// department: string;
+	phone: string;
+	email: string;
+	fullname: string;
+	id: string;
+	username: string;
 };
 
 type GroupID = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "";

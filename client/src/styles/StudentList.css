@@ -125,18 +125,18 @@ select {
 input::placeholder {
 	color: #9eabbd;
 }
-button.actions {
+.actions {
 	padding: 0.5rem 1rem;
 	border-radius: 3px;
 	color: white;
 	border: none;
 	transition: all 0.15s ease;
-}
-button.submit {
-	background-color: #00959c;
 	margin-right: 1rem;
 }
-button.actions:hover {
+.submit {
+	background-color: #00959c;
+}
+.actions:hover {
 	opacity: 0.8;
 }
 button.cancel {

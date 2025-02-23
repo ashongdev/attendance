@@ -1,11 +1,12 @@
 import { Router } from "express";
 import RateLimit from "express-rate-limit";
 import {
-	authenticate,
-	getStudents,
-	editStudentInfo,
 	addStudent,
+	authenticate,
+	editStudentInfo,
+	getStudents,
 	removeStudent,
+	signup,
 } from "../controllers/lecturerController";
 
 export const router = Router();
@@ -24,6 +25,7 @@ router.get("/lec/students", getStudents);
 
 router.post("/lec/get-students", getStudents);
 router.post("/lec/add-student", addStudent);
+router.post("/lec/signup", signup);
 router.delete("/lec/rem-student/:id", removeStudent);
 
 // router.post("/register-course", registerCourse);

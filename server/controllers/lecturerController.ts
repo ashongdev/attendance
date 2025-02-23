@@ -1,8 +1,7 @@
+import { log } from "console";
 import { Request, Response } from "express";
-import { QueryResult } from "pg";
 import { v4 as uuid } from "uuid";
 import { pool } from "../db";
-import { log } from "console";
 
 const handleErrors = (errors: any) => {
 	// log("Error:", errors.message);
@@ -111,12 +110,56 @@ const removeStudent = async (req: Request, res: Response) => {
 	console.log("Removed", id);
 };
 
+const signup = async (req: Request, res: Response) => {
+	const {
+		username,
+		id,
+		email,
+		phone,
+		fullname,
+		faculty,
+		no_of_groups,
+		password,
+		group1,
+		group2,
+		group3,
+		group4,
+	} = req.body;
+	// if (no_of_groups === 4) {
+	// 	const { group1, group2, group3, group4 } = req.body;
+	// } else if (no_of_groups === 3) {
+	// 	const { group1, group2, group3 } = req.body;
+	// } else if (no_of_groups === 2) {
+	// 	const { group1, group2 } = req.body;
+	// }
+	try {
+		const sql = await pool.query(
+			`INSERT INTO LECTURERS (LECTURER_ID, NAME, EMAIL, PHONE, FACULTY, PASSWORD,USERNAME, NO_OF_GROUPS) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+			[
+				id,
+				fullname,
+				email,
+				phone,
+				faculty,
+				password,
+				username,
+				no_of_groups,
+			]
+		);
+	} catch (error) {
+		console.log("🚀 ~ signup ~ error:", error);
+	}
+
+	log("Hisl", req.body);
+};
+
 const authenticate = async (req: Request, res: Response): Promise<void> => {};
 
 export {
-	authenticate,
-	getStudents,
-	editStudentInfo,
 	addStudent,
+	authenticate,
+	editStudentInfo,
+	getStudents,
 	removeStudent,
+	signup,
 };

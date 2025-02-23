@@ -1,20 +1,18 @@
 import { useEffect, useState } from "react";
-import personIcon from "../images/user-regular.svg";
+import useContextProvider from "../hooks/useContextProvider";
+import useFunctions from "../hooks/useFunctions";
+import lateIcon from "../images/alarm-outline.svg";
 import presentIcon from "../images/checkmark-circle-outline.svg";
 import absentIcon from "../images/close-circle-outline.svg";
-import lateIcon from "../images/alarm-outline.svg";
-import useFunctions from "../hooks/useFunctions";
-import useContextProvider from "../hooks/useContextProvider";
+import personIcon from "../images/user-regular.svg";
 
 const Dashboard = () => {
-	const { studentsList } = useContextProvider();
-	const { getStorageItem } = useFunctions();
+	const { studentsList, setStudentsList, setShowErrorMessage, setError } =
+		useContextProvider();
+	const { getStudentsList } = useFunctions();
 	const [totalPresent, setTotalPresent] = useState(0);
 	const [totalAbsent, setTotalAbsent] = useState(0);
 	const [totalNotMarked, setTotalNotMarked] = useState(0);
-	const [askGroup, setAskGroup] = useState(
-		getStorageItem("askCounter", false)
-	);
 
 	const calculateTotals = () => {
 		studentsList.forEach((std) => {
@@ -29,7 +27,8 @@ const Dashboard = () => {
 		return { totalAbsent, totalPresent };
 	};
 	useEffect(() => {
-		!askGroup && setAskGroup(true);
+		getStudentsList(setStudentsList, setShowErrorMessage, setError);
+
 		calculateTotals();
 
 		return;
