@@ -1,13 +1,14 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import Axios from "axios";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { Lecturer } from "../exports/exports";
+import useContextProvider from "../hooks/useContextProvider";
 import LecSignup2 from "./LecSignup2";
 
 const LecSignup = () => {
 	const [noOfGroups, setNoOfGroups] = useState(1);
+	const { setShowErrorMessage, setError } = useContextProvider();
 
 	const Schema = yup.object().shape({
 		id: yup
@@ -73,42 +74,25 @@ const LecSignup = () => {
 		setNoOfGroups(selectedNoOfGroups);
 	}, [selectedNoOfGroups]);
 
+	const [userData, setUserData] = useState<Omit<
+		Lecturer,
+		"confirmPassword"
+	> | null>(null);
+
 	const submitHandler = async (data: Omit<Lecturer, "confirmPassword">) => {
 		if (!data) {
 			alert("No data provided for this provided.");
 			return;
 		}
-		console.log(data);
-
-		try {
-			// const signup = async () => {
-			const res = Axios.post("http://localhost:4002/lec/signup", {
-				password: data.password,
-				group1: data.group1,
-				group2: data.group2,
-				group3: data.group3,
-				group4: data.group4,
-				no_of_groups: data.no_of_groups,
-				faculty: data.faculty,
-				phone: data.phone,
-				email: data.email,
-				fullname: data.fullname,
-				id: data.id,
-				username: data.username,
-			});
-			// };
-		} catch (error) {
-			console.log("🚀 ~ submitHandler ~ error:", error);
-		}
+		setUserData(data);
+		setPageNo(4);
 	};
 
 	useEffect(() => {
-		if (!errors.fullname && !errors.phone && !errors.id && !errors.email)
+		if (!errors.fullname && !errors.phone && !errors.id && !errors.username)
 			if (errors.faculty && errors.no_of_groups) {
 				setPageNo(2);
 			}
-
-		console.log(errors);
 	}, [errors]);
 
 	const [pageNo, setPageNo] = useState(1);
@@ -120,10 +104,6 @@ const LecSignup = () => {
 				setShowNextPage(true);
 			}, 120);
 		}
-	}, [pageNo]);
-
-	useEffect(() => {
-		console.log(pageNo);
 	}, [pageNo]);
 
 	return (
@@ -161,11 +141,13 @@ const LecSignup = () => {
 						</div>
 
 						<div className="block">
-							<label htmlFor="name">Email Address</label>
+							<label htmlFor="username">
+								Please enter a username
+							</label>
 							<input
-								type="email"
-								placeholder="e.g., test@example.us"
-								{...register("email")}
+								type="text"
+								placeholder="e.g., Emmanuel Asamoah"
+								{...register("username")}
 							/>
 						</div>
 
@@ -191,6 +173,7 @@ const LecSignup = () => {
 							errors={errors}
 							pageNo={pageNo}
 							selectedNoOfGroups={selectedNoOfGroups}
+							userData={userData}
 						/>
 					)}
 					{/* )} */}

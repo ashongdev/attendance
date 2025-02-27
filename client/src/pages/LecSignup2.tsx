@@ -1,4 +1,5 @@
-import { Dispatch, FC, SetStateAction, useEffect } from "react";
+import { Dispatch, FC, SetStateAction, useEffect, useState } from "react";
+import { Lecturer } from "../exports/exports";
 import LecSignup3 from "./LecSignup3";
 
 interface Props {
@@ -8,6 +9,7 @@ interface Props {
 	errors: any;
 	setPageNo: Dispatch<SetStateAction<number>>;
 	selectedNoOfGroups: any;
+	userData: Omit<Lecturer, "confirmPassword"> | null;
 }
 
 const LecSignup2: FC<Props> = ({
@@ -17,7 +19,18 @@ const LecSignup2: FC<Props> = ({
 	errors,
 	setPageNo,
 	selectedNoOfGroups,
+	userData,
 }) => {
+	const [showNextPage, setShowNextPage] = useState(false);
+
+	useEffect(() => {
+		if (pageNo === 3) {
+			setTimeout(() => {
+				setShowNextPage(true);
+			}, 120);
+		}
+	}, [pageNo]);
+
 	const MyGroupsSelection = ({
 		selectedNoOfGroups,
 		register,
@@ -49,17 +62,17 @@ const LecSignup2: FC<Props> = ({
 			!errors.fullname &&
 			!errors.phone &&
 			!errors.id &&
-			!errors.email &&
+			!errors.username &&
 			!errors.faculty &&
 			!errors.group1 &&
 			!errors.group2 &&
 			!errors.group3 &&
 			!errors.group4 &&
 			!errors.no_of_groups
-		)
-			setPageNo(3);
-
-		console.log(errors);
+		) {
+			if (errors.email && errors.password && errors.confirmPassword)
+				setPageNo(3);
+		}
 	}, [errors]);
 
 	return (
@@ -115,7 +128,7 @@ const LecSignup2: FC<Props> = ({
 				<button className="actions submit">Next</button>
 			</section>
 
-			{pageNo === 3 && (
+			{showNextPage && (
 				<LecSignup3
 					register={register}
 					watch={watch}
@@ -123,6 +136,7 @@ const LecSignup2: FC<Props> = ({
 					errors={errors}
 					pageNo={pageNo}
 					selectedNoOfGroups={selectedNoOfGroups}
+					userData={userData}
 				/>
 			)}
 		</>

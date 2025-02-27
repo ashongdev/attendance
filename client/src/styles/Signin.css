@@ -39,8 +39,8 @@
 }
 
 .slide-out {
-	position: absolute; /* Removes from layout so the next section expands */
-	width: 100%; /* Keeps it aligned */
+	position: absolute;
+	width: 100%;
 	animation: slide-out 0.3s ease-in forwards;
 }
 
@@ -52,6 +52,40 @@
 	to {
 		opacity: 0;
 		transform: translateX(-10rem);
-		/* display: none; */
 	}
+}
+
+.otp-field {
+	display: flex;
+	width: 100%;
+}
+
+.otp-field input {
+	height: 4rem;
+	font-size: 1.5rem;
+	padding: 0.625rem;
+	text-align: center;
+	border-radius: 0.3125rem;
+	margin: 0.125rem;
+	color: rgb(79, 70, 229);
+	outline: none;
+	transition: all 0.1s;
+}
+
+.otp-field input:focus {
+	border: 0.09rem solid #a527ff;
+	box-shadow: 0 0 0.125rem 0.125rem #a527ff6a;
+}
+
+.disabled {
+	opacity: 0.5;
+}
+
+.space {
+	margin-right: 1rem !important;
+}
+.error {
+	color: red;
+	font-size: 0.8rem;
+	font-weight: normal;
 }

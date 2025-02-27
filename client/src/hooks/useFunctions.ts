@@ -1,6 +1,5 @@
-import { Dispatch, SetStateAction } from "react";
-import * as XLSX from "xlsx";
 import Axios from "axios";
+import { Dispatch, SetStateAction } from "react";
 import { Mode, Student } from "../exports/exports";
 
 const useFunctions = () => {
@@ -224,6 +223,7 @@ const useFunctions = () => {
 		editStudentInfo,
 		addStudent,
 		removeStudent,
+		setterFunc,
 	};
 };
 

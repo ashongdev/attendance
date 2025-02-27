@@ -1,4 +1,6 @@
-import { Dispatch, FC, SetStateAction } from "react";
+import { Dispatch, FC, SetStateAction, useEffect, useState } from "react";
+import { Lecturer } from "../exports/exports";
+import LecVerification from "./LecVerification";
 
 interface Props {
 	pageNo: number;
@@ -7,6 +9,7 @@ interface Props {
 	errors: any;
 	setPageNo: Dispatch<SetStateAction<number>>;
 	selectedNoOfGroups: any;
+	userData: Omit<Lecturer, "confirmPassword"> | null;
 }
 
 const LecSignup3: FC<Props> = ({
@@ -16,47 +19,70 @@ const LecSignup3: FC<Props> = ({
 	errors,
 	setPageNo,
 	selectedNoOfGroups,
+	userData,
 }) => {
+	const [showNextPage, setShowNextPage] = useState(false);
+
+	useEffect(() => {
+		if (pageNo === 4) {
+			setTimeout(() => {
+				setShowNextPage(true);
+			}, 120);
+		}
+	}, [pageNo]);
+
 	return (
-		// <div className="signin-cont">
-		// 	<div className="header">
-		// 		<h1>Enter Details</h1>
-		// 	</div>
+		<>
+			<section
+				className={`page2 ${pageNo === 3 ? "slide-in" : "slide-out"}`}
+			>
+				<div className="block">
+					<label htmlFor="name">Email Address</label>
+					<input
+						type="email"
+						placeholder="e.g., test@example.us"
+						{...register("email")}
+					/>
+				</div>
 
-		<section className={`page2 ${pageNo === 3 ? "slide-in" : "slide-out"}`}>
-			<div className="block">
-				<label htmlFor="username">Please enter a username</label>
-				<input
-					type="text"
-					placeholder="e.g., Emmanuel Asamoah"
-					{...register("username")}
+				<div className="block">
+					<label htmlFor="password">Set a password</label>
+					<input
+						type="password"
+						placeholder="e.g., *************"
+						{...register("password")}
+					/>
+				</div>
+
+				<div className="block">
+					<label htmlFor="confirm-password">Re-enter Password</label>
+
+					<input
+						type="password"
+						placeholder="e.g., *************"
+						{...register("confirmPassword")}
+					/>
+				</div>
+
+				<button className="actions cancel" onClick={() => setPageNo(2)}>
+					Back
+				</button>
+				<button className="actions submit">Next</button>
+			</section>
+
+			{showNextPage && (
+				<LecVerification
+					register={register}
+					watch={watch}
+					setPageNo={setPageNo}
+					errors={errors}
+					pageNo={pageNo}
+					selectedNoOfGroups={selectedNoOfGroups}
+					userData={userData}
 				/>
-			</div>
+			)}
+		</>
 
-			<div className="block">
-				<label htmlFor="password">Set a password</label>
-				<input
-					type="password"
-					placeholder="e.g., *************"
-					{...register("password")}
-				/>
-			</div>
-
-			<div className="block">
-				<label htmlFor="confirm-password">Re-enter Password</label>
-
-				<input
-					type="password"
-					placeholder="e.g., *************"
-					{...register("confirmPassword")}
-				/>
-			</div>
-
-			<button className="actions cancel" onClick={() => setPageNo(2)}>
-				Back
-			</button>
-			<button className="actions submit">Next</button>
-		</section>
 		// </div>
 	);
 };
