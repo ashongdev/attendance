@@ -21,6 +21,10 @@ interface ContextType {
 	>;
 	openModal: boolean;
 	setOpenModal: Dispatch<SetStateAction<boolean>>;
+	userData: Omit<Lecturer, "confirmPassword"> | null;
+	setUserData: Dispatch<
+		SetStateAction<Omit<Lecturer, "confirmPassword"> | null>
+	>;
 }
 
 const ContextProvider = createContext<ContextType | undefined>(undefined);
@@ -31,7 +35,7 @@ type Mode = "edit" | "add" | "list" | "del" | "";
 type Student = {
 	index_number: string;
 	fullname: string;
-	groupid: string;
+	groupid: GroupID;
 	email: string;
 	status?: boolean | null;
 };
@@ -39,10 +43,10 @@ type Student = {
 type Lecturer = {
 	confirmPassword: string;
 	password: string;
-	group1?: string;
-	group2?: string;
-	group3?: string;
-	group4?: string;
+	group1?: GroupID;
+	group2?: GroupID;
+	group3?: GroupID;
+	group4?: GroupID;
 	no_of_groups: number;
 	faculty: string;
 	phone: string;

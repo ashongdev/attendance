@@ -1,14 +1,14 @@
 import { FC, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import Confirm from "../components/ConfirmationModal";
+import ErrorAlert from "../components/ErrorAlert";
 import Form from "../components/Form";
 import SuccessAlert from "../components/SuccessAlert";
 import { Page, Student } from "../exports/exports";
+import useContextProvider from "../hooks/useContextProvider";
+import useFunctions from "../hooks/useFunctions";
 import editIcon from "../images/create-outline.svg";
 import trashCanIcon from "../images/trash-outline.svg";
-import useFunctions from "../hooks/useFunctions";
-import useContextProvider from "../hooks/useContextProvider";
-import ErrorAlert from "../components/ErrorAlert";
-import Confirm from "../components/ConfirmationModal";
 
 interface Props {
 	changePage: (val: Page) => void;
@@ -29,6 +29,7 @@ const List: FC<Props> = ({ changePage }) => {
 		error,
 		openModal,
 		setOpenModal,
+		userData,
 	} = useContextProvider();
 
 	const [studentToBeEdited, setStudentToBeEdited] = useState<
@@ -46,7 +47,13 @@ const List: FC<Props> = ({ changePage }) => {
 	};
 
 	useEffect(() => {
-		getStudentsList(setStudentsList, setShowErrorMessage, setError);
+		userData &&
+			getStudentsList(
+				setStudentsList,
+				setShowErrorMessage,
+				setError,
+				userData.group1
+			);
 	}, []);
 
 	return (
@@ -57,7 +64,7 @@ const List: FC<Props> = ({ changePage }) => {
 					setShowErrorMessage={setShowErrorMessage}
 					setMode={setMode}
 					mode={mode}
-					editdata={studentToBeEdited}
+					editData={studentToBeEdited}
 					setError={setError}
 				/>
 			)}

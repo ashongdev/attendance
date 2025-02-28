@@ -1,8 +1,8 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Dispatch, FC, SetStateAction } from "react";
+import { Dispatch, FC, SetStateAction, useRef } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import { Mode, Student } from "../exports/exports";
+import { GroupID, Mode, Student } from "../exports/exports";
 import useContextProvider from "../hooks/useContextProvider";
 import useFunctions from "../hooks/useFunctions";
 
@@ -29,6 +29,8 @@ const Form: FC<Props> = ({
 	const { studentsList, setStudentsList, setOpenModal } =
 		useContextProvider();
 
+	type StudentFormData = yup.InferType<typeof Schema>;
+
 	const Schema = yup.object().shape({
 		index_number: yup
 			.string()
@@ -38,19 +40,17 @@ const Form: FC<Props> = ({
 		groupid: yup
 			.string()
 			.required()
-			.matches(/^[A-H]{1}$/i),
+			.matches(/^[A-H]$/i) as yup.StringSchema<GroupID>,
 		email: yup
 			.string()
 			.email()
 			.required()
 			.matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/),
 	});
+	const { getStorageItem } = useFunctions();
+	const { userData } = useContextProvider();
 
-	const {
-		register,
-		// formState: { errors },
-		handleSubmit,
-	} = useForm({
+	const { register, handleSubmit } = useForm<StudentFormData>({
 		resolver: yupResolver(Schema),
 	});
 
@@ -85,6 +85,8 @@ const Form: FC<Props> = ({
 		}
 	};
 
+	const timerRef = useRef<number>(0);
+	const filterGroupID = getStorageItem("filterGroupID", null);
 	return (
 		<div className="modal">
 			<form onSubmit={handleSubmit(submitHandler)} className="cont">
@@ -141,18 +143,32 @@ const Form: FC<Props> = ({
 							defaultValue={
 								mode === "edit"
 									? editdata && editdata.groupid
-									: ""
+									: filterGroupID
 							}
 						>
 							<option value="">--Select Group--</option>
-							<option value="A">A</option>
-							<option value="B">B</option>
-							<option value="C">C</option>
-							<option value="D">D</option>
-							<option value="E">E</option>
-							<option value="F">F</option>
-							<option value="G">G</option>
-							<option value="H">H</option>
+							{userData && (
+								<>
+									<option value={userData.group1}>
+										{userData.group1}
+									</option>
+									{userData.group2 && (
+										<option value={userData.group2}>
+											{userData.group2}
+										</option>
+									)}
+									{userData.group3 && (
+										<option value={userData.group3}>
+											{userData.group3}
+										</option>
+									)}
+									{userData.group4 && (
+										<option value={userData.group4}>
+											{userData.group4}
+										</option>
+									)}
+								</>
+							)}
 						</select>
 					</div>
 
@@ -160,9 +176,12 @@ const Form: FC<Props> = ({
 					<button
 						className="actions cancel"
 						onClick={() => {
-							setTimeout(() => {
+							if (timerRef.current) {
+								clearTimeout(timerRef.current);
+							}
+							timerRef.current = setTimeout(() => {
 								setMode("");
-							}, 2000);
+							}, 2000) as unknown as number;
 							setOpenModal(false);
 						}}
 					>

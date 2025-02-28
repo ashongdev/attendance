@@ -136,6 +136,9 @@ input::placeholder {
 .submit {
 	background-color: #00959c;
 }
+.submit.width {
+	width: 100%;
+}
 .actions:hover {
 	opacity: 0.8;
 }

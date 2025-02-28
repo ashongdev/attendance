@@ -1,16 +1,16 @@
 import { FC, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { GroupID, Page, Status, Student } from "../exports/exports";
-import useFunctions from "../hooks/useFunctions";
-import useContextProvider from "../hooks/useContextProvider";
 import ErrorAlert from "../components/ErrorAlert";
+import { GroupID, Page, Status, Student } from "../exports/exports";
+import useContextProvider from "../hooks/useContextProvider";
+import useFunctions from "../hooks/useFunctions";
 
 interface Props {
 	changePage: (val: Page) => void;
 }
 
 const Attendance: FC<Props> = ({ changePage }) => {
-	const { getStudentsList } = useFunctions();
+	const { getStudentsList, getStorageItem } = useFunctions();
 	const {
 		studentsList,
 		setStudentsList,
@@ -18,15 +18,18 @@ const Attendance: FC<Props> = ({ changePage }) => {
 		showErrorMessage,
 		setError,
 		error,
+		userData,
 	} = useContextProvider();
 
 	const [clickedStudent, setClickedStudent] = useState("");
-	const [filterGroupID, setFilterGroupID] = useState<GroupID>("");
+	const [filterGroupID, setFilterGroupID] = useState<GroupID | undefined>(
+		getStorageItem("filterGroupID", null)
+	);
 	const [filteredStudentList, setFilterStudentList] = useState<Student[]>([]);
 	const [studentStatus, setStudentStatus] = useState<Status | null>(null);
 
 	// Filter by group
-	const filterStudents = (groupid: GroupID) => {
+	const filterStudents = (groupid: GroupID | undefined) => {
 		const filteredStudents = studentsList.filter(
 			(student) => student.groupid === groupid
 		);
@@ -54,15 +57,36 @@ const Attendance: FC<Props> = ({ changePage }) => {
 		}
 	}, [studentStatus]);
 
+	let { href: navigateTo } = window.location;
 	useEffect(() => {
 		filterStudents(filterGroupID);
+
+		if (userData)
+			if (
+				!userData?.group1 &&
+				(userData.group1 === "" ||
+					userData.group2 === "" ||
+					userData.group3 === "" ||
+					userData.group4 === "")
+			) {
+				localStorage.removeItem("s");
+				localStorage.removeItem("userData");
+				navigateTo = "/signup";
+			}
+
+		localStorage.setItem("filterGroupID", JSON.stringify(filterGroupID));
+
+		userData &&
+			getStudentsList(
+				setStudentsList,
+				setShowErrorMessage,
+				setError,
+				filterGroupID
+			);
 	}, [filterGroupID]);
 
 	useEffect(() => {
-		// for (let i = 0; i < 105; i++) {
-		// console.log(i);
-		getStudentsList(setStudentsList, setShowErrorMessage, setError);
-		// }
+		userData && setFilterGroupID(userData?.group1);
 	}, []);
 
 	return (
@@ -82,27 +106,17 @@ const Attendance: FC<Props> = ({ changePage }) => {
 							Attendance
 						</Link>
 						{" > "}
-						{/* {filterGroupID && (
+						{filterGroupID && (
 							<>
 								<Link to="/attendance">
 									Group {filterGroupID}
 								</Link>
 								{" >"}
 							</>
-						)} */}
-						{studentsList &&
-							studentsList.length > 0 &&
-							studentsList[0].groupid && (
-								<>
-									<Link to="/attendance">
-										Group {studentsList[0].groupid}
-									</Link>
-									{" >"}
-								</>
-							)}
+						)}
 					</span>
 				</div>
-				{/* <button>
+				<button>
 					GROUP
 					<select
 						name="group"
@@ -112,17 +126,30 @@ const Attendance: FC<Props> = ({ changePage }) => {
 							setFilterGroupID(e.target.value as GroupID)
 						}
 					>
-						<option value="">--</option>
-						<option value="A">A</option>
-						<option value="B">B</option>
-						<option value="C">C</option>
-						<option value="D">D</option>
-						<option value="E">E</option>
-						<option value="F">F</option>
-						<option value="G">G</option>
-						<option value="H">H</option>
+						{userData && (
+							<>
+								<option value={userData.group1}>
+									{userData.group1}
+								</option>
+								{userData.group2 && (
+									<option value={userData.group2}>
+										{userData.group2}
+									</option>
+								)}
+								{userData.group3 && (
+									<option value={userData.group3}>
+										{userData.group3}
+									</option>
+								)}
+								{userData.group4 && (
+									<option value={userData.group4}>
+										{userData.group4}
+									</option>
+								)}
+							</>
+						)}
 					</select>
-				</button> */}
+				</button>
 			</div>
 
 			<div className="list-container">

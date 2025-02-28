@@ -1,19 +1,14 @@
-import { yupResolver } from "@hookform/resolvers/yup";
-import { Dispatch, FC, SetStateAction, useState } from "react";
-import { useForm } from "react-hook-form";
-import * as yup from "yup";
-import Axios from "axios";
-import useContextProvider from "../hooks/useContextProvider";
+import { Dispatch, FC, SetStateAction } from "react";
 import { Mode, Student } from "../exports/exports";
+import useContextProvider from "../hooks/useContextProvider";
 import useFunctions from "../hooks/useFunctions";
-import ErrorAlert from "./ErrorAlert";
 
 interface Props {
 	setShowAlertPopup: Dispatch<SetStateAction<boolean>>;
 	setShowErrorMessage: Dispatch<SetStateAction<boolean>>;
 	mode: Mode;
 	setMode: Dispatch<SetStateAction<Mode>>;
-	editdata?: Omit<Student, "status">;
+	editData?: Omit<Student, "status">;
 	setError: Dispatch<SetStateAction<{ header: string; description: string }>>;
 }
 
@@ -21,28 +16,11 @@ const Confirm: FC<Props> = ({
 	setShowAlertPopup,
 	setShowErrorMessage,
 	setMode,
-	editdata,
+	editData,
 	setError,
 }) => {
-	const { removeStudent } = useFunctions();
+	const { removeStudent, clearTimer } = useFunctions();
 	const { setOpenModal, setStudentsList } = useContextProvider();
-
-	const Schema = yup.object().shape({
-		index_number: yup
-			.string()
-			.required()
-			.matches(/^[0-9]{10}$/),
-		fullname: yup.string().required(),
-		groupid: yup
-			.string()
-			.required()
-			.matches(/^[A-H]{1}$/i),
-		email: yup
-			.string()
-			.email()
-			.required()
-			.matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/),
-	});
 
 	return (
 		<div className="modal">
@@ -58,18 +36,18 @@ const Confirm: FC<Props> = ({
 						<label className="details">Student Details</label>
 						<div className="details">
 							<span>
-								Name: {editdata ? editdata.fullname : ""}
+								Name: {editData ? editData.fullname : ""}
 							</span>
 							<br />
 							<span>
 								Index No:{" "}
-								{editdata ? editdata.index_number : ""}
+								{editData ? editData.index_number : ""}
 							</span>
 							<br />
-							<span>Email: {editdata ? editdata.email : ""}</span>
+							<span>Email: {editData ? editData.email : ""}</span>
 							<br />
 							<span>
-								Group ID: {editdata ? editdata.groupid : ""}
+								Group ID: {editData ? editData.groupid : ""}
 							</span>
 						</div>
 					</div>
@@ -78,7 +56,8 @@ const Confirm: FC<Props> = ({
 						className="actions submit"
 						onClick={() => {
 							removeStudent(
-								editdata ? editdata?.index_number : "",
+								editData ? editData?.index_number : "",
+								editData ? editData?.groupid : "",
 								setShowErrorMessage,
 								setError,
 								setStudentsList,
@@ -93,9 +72,7 @@ const Confirm: FC<Props> = ({
 					<button
 						className="actions cancel"
 						onClick={() => {
-							setTimeout(() => {
-								setMode("");
-							}, 2000);
+							clearTimer();
 							setOpenModal(false);
 						}}
 					>

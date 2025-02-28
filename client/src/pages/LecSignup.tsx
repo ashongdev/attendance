@@ -8,7 +8,7 @@ import LecSignup2 from "./LecSignup2";
 
 const LecSignup = () => {
 	const [noOfGroups, setNoOfGroups] = useState(1);
-	const { setShowErrorMessage, setError } = useContextProvider();
+	const { setUserData } = useContextProvider();
 
 	const Schema = yup.object().shape({
 		id: yup
@@ -74,16 +74,12 @@ const LecSignup = () => {
 		setNoOfGroups(selectedNoOfGroups);
 	}, [selectedNoOfGroups]);
 
-	const [userData, setUserData] = useState<Omit<
-		Lecturer,
-		"confirmPassword"
-	> | null>(null);
-
 	const submitHandler = async (data: Omit<Lecturer, "confirmPassword">) => {
 		if (!data) {
 			alert("No data provided for this provided.");
 			return;
 		}
+
 		setUserData(data);
 		setPageNo(4);
 	};
@@ -168,12 +164,10 @@ const LecSignup = () => {
 					{showNextPage && (
 						<LecSignup2
 							register={register}
-							watch={watch}
 							setPageNo={setPageNo}
 							errors={errors}
 							pageNo={pageNo}
 							selectedNoOfGroups={selectedNoOfGroups}
-							userData={userData}
 						/>
 					)}
 					{/* )} */}
