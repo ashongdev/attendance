@@ -1,5 +1,5 @@
-import { ReactNode, useEffect, useState } from "react";
-import { ContextProvider, Mode, Student } from "../exports/exports";
+import { ReactNode, useEffect, useRef, useState } from "react";
+import { ContextProvider, Lecturer, Mode, Student } from "../exports/exports";
 import useFunctions from "../hooks/useFunctions";
 
 // const socket = io("http://localhost:4000");
@@ -13,7 +13,10 @@ const Context = ({ children }: { children: ReactNode }) => {
 	const role: "Admin" | "Lecturer" | "Student" = getStorageItem("role", null);
 
 	const [mode, setMode] = useState<Mode>("");
-	const [auth, setAuth] = useState<Mode>("");
+	const [userData, setUserData] = useState<Omit<
+		Lecturer,
+		"confirmPassword"
+	> | null>(getStorageItem("userData", null));
 	const [showErrorMessage, setShowErrorMessage] = useState(false);
 	const [showAlertPopup, setShowAlertPopup] = useState(false);
 	const [error, setError] = useState({
@@ -22,19 +25,33 @@ const Context = ({ children }: { children: ReactNode }) => {
 	});
 	const [openModal, setOpenModal] = useState(false);
 
+	const timeoutId = useRef<NodeJS.Timeout | null>(null);
+	const alertTimeout = useRef<NodeJS.Timeout | null>(null);
+	const errorTimeout = useRef<NodeJS.Timeout | null>(null);
+
 	useEffect(() => {
 		if (showAlertPopup) {
 			setOpenModal(false);
-			setTimeout(() => {
+
+			if (alertTimeout.current) clearTimeout(alertTimeout.current);
+
+			alertTimeout.current = setTimeout(() => {
 				setShowAlertPopup(false);
 			}, 2000);
 		}
 
 		if (showErrorMessage) {
-			setTimeout(() => {
+			if (errorTimeout.current) clearTimeout(errorTimeout.current);
+
+			errorTimeout.current = setTimeout(() => {
 				setShowErrorMessage(false);
 			}, 2000);
 		}
+
+		return () => {
+			if (alertTimeout.current) clearTimeout(alertTimeout.current);
+			if (errorTimeout.current) clearTimeout(errorTimeout.current);
+		};
 	}, [showAlertPopup, showErrorMessage]);
 
 	return (
@@ -53,6 +70,8 @@ const Context = ({ children }: { children: ReactNode }) => {
 				setError,
 				openModal,
 				setOpenModal,
+				userData,
+				setUserData,
 			}}
 		>
 			{children}

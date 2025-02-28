@@ -1,8 +1,17 @@
 import Axios from "axios";
-import { Dispatch, SetStateAction } from "react";
-import { Mode, Student } from "../exports/exports";
+import { Dispatch, SetStateAction, useEffect, useRef } from "react";
+import { GroupID, Mode, Student } from "../exports/exports";
 
 const useFunctions = () => {
+	const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+	const clearTimer = () => {
+		if (timerRef.current) {
+			clearTimeout(timerRef.current);
+			timerRef.current = null;
+		}
+	};
+
 	const getStorageItem = (
 		itemName: string,
 		returnItem: null | [] | undefined | boolean
@@ -11,10 +20,7 @@ const useFunctions = () => {
 		try {
 			return storedItem ? JSON.parse(storedItem) : returnItem;
 		} catch (error) {
-			console.error(
-				"Error parsing opt changes from localStorage:",
-				error
-			);
+			console.error("Error parsing data from localStorage:", error);
 			return null;
 		}
 	};
@@ -26,10 +32,11 @@ const useFunctions = () => {
 		modeSetter: Dispatch<SetStateAction<Mode>>,
 		res: any
 	) => {
+		clearTimer();
 		valueSetter(res.data);
-
 		modalSetter(false);
-		setTimeout(() => {
+
+		timerRef.current = setTimeout(() => {
 			modeSetter("");
 		}, 2000);
 		alertPopupSetter(true);
@@ -55,7 +62,8 @@ const useFunctions = () => {
 				data
 			);
 
-			if (!res.data) return alert("An unexpected error occured");
+			if (!res.data) return alert("An unexpected error occurred");
+
 			setterFunc(
 				valueSetter,
 				modalSetter,
@@ -64,23 +72,25 @@ const useFunctions = () => {
 				res
 			);
 		} catch (error) {
-			console.log("🚀 ~ useFunctions ~ error:", error);
-			alert("An unexpected error occured");
+			alert("An unexpected error occurred");
 			return;
 		}
 	};
-
-	const currentDate = new Date().toLocaleString();
 
 	const getStudentsList = async (
 		setter: Dispatch<SetStateAction<Student[]>>,
 		errorPopupSetter: Dispatch<SetStateAction<boolean>>,
 		errorSetter: Dispatch<
 			SetStateAction<{ header: string; description: string }>
-		>
+		>,
+		groupid: GroupID | undefined
 	) => {
+		if (!groupid) return;
+
 		try {
-			const res = await Axios.get("http://localhost:4002/lec/students");
+			const res = await Axios.get(
+				`http://localhost:4002/lec/students/${groupid}`
+			);
 
 			if (!res.data) {
 				return alert("An Unexpected error occurred. Please try again.");
@@ -88,7 +98,6 @@ const useFunctions = () => {
 
 			setter(res.data);
 		} catch (error: any) {
-			console.log("CODE: ", error);
 			errorPopupSetter(true);
 			if (error.status === 429) {
 				errorSetter({
@@ -101,9 +110,6 @@ const useFunctions = () => {
 					description: "Please try again.",
 				});
 			}
-
-			console.log("🚀 ~ getStudentsList ~ error:", error);
-			return;
 		}
 	};
 
@@ -128,6 +134,7 @@ const useFunctions = () => {
 				alertPopupSetter(false);
 				return alert("An unexpected error occurred.");
 			}
+
 			setterFunc(
 				valueSetter,
 				modalSetter,
@@ -136,10 +143,9 @@ const useFunctions = () => {
 				res
 			);
 		} catch (error: any) {
-			const { msg } = error.response.data;
+			const { msg } = error.response?.data || {};
 			errorPopupSetter(true);
 			errorSetter({ header: "Duplicate Entry", description: msg });
-			return;
 		}
 	};
 	// const generateExcelFile = (
@@ -185,6 +191,7 @@ const useFunctions = () => {
 
 	const removeStudent = async (
 		index_number: string,
+		groupid: GroupID,
 		errorPopupSetter: Dispatch<SetStateAction<boolean>>,
 		errorSetter: Dispatch<
 			SetStateAction<{ header: string; description: string }>
@@ -196,8 +203,10 @@ const useFunctions = () => {
 	) => {
 		try {
 			const res = await Axios.delete(
-				`http://localhost:4002/lec/rem-student/${index_number}`
+				`http://localhost:4002/lec/rem-student/${index_number}`,
+				{ params: { groupid } }
 			);
+
 			if (!res.data) {
 				return alert("⚠️ An unexpected error occurred!");
 			}
@@ -210,12 +219,16 @@ const useFunctions = () => {
 				res
 			);
 		} catch (error: any) {
-			const { msg } = error.response.data;
+			console.log("🚀 ~ useFunctions ~ error:", error);
+			const { msg } = error.response?.data || {};
 			errorPopupSetter(true);
 			errorSetter({ header: "Duplicate Entry", description: msg });
 		}
 	};
-	const storedStudentList = getStorageItem("studentList", null);
+
+	useEffect(() => {
+		return () => clearTimer();
+	}, []);
 
 	return {
 		getStorageItem,
@@ -224,6 +237,7 @@ const useFunctions = () => {
 		addStudent,
 		removeStudent,
 		setterFunc,
+		clearTimer,
 	};
 };
 

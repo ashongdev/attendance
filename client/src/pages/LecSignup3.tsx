@@ -1,25 +1,20 @@
 import { Dispatch, FC, SetStateAction, useEffect, useState } from "react";
-import { Lecturer } from "../exports/exports";
 import LecVerification from "./LecVerification";
 
 interface Props {
 	pageNo: number;
 	register: any;
-	watch: any;
 	errors: any;
 	setPageNo: Dispatch<SetStateAction<number>>;
 	selectedNoOfGroups: any;
-	userData: Omit<Lecturer, "confirmPassword"> | null;
 }
 
 const LecSignup3: FC<Props> = ({
 	pageNo,
 	register,
-	watch,
 	errors,
 	setPageNo,
 	selectedNoOfGroups,
-	userData,
 }) => {
 	const [showNextPage, setShowNextPage] = useState(false);
 
@@ -72,13 +67,10 @@ const LecSignup3: FC<Props> = ({
 
 			{showNextPage && (
 				<LecVerification
-					register={register}
-					watch={watch}
 					setPageNo={setPageNo}
 					errors={errors}
 					pageNo={pageNo}
 					selectedNoOfGroups={selectedNoOfGroups}
-					userData={userData}
 				/>
 			)}
 		</>

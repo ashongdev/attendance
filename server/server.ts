@@ -6,7 +6,6 @@ import express from "express";
 import { pool } from "./db";
 import lecturerRoutes from "./routes/lecturerRoutes";
 import studentRoutes from "./routes/studentRoutes";
-import { log } from "console";
 
 config();
 
@@ -35,7 +34,7 @@ app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use((req, res, next) => {
-	log(req.path, req.method);
+	console.log(req.path, req.method, req.params);
 
 	next();
 });

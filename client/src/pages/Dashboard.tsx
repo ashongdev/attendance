@@ -7,8 +7,7 @@ import absentIcon from "../images/close-circle-outline.svg";
 import personIcon from "../images/user-regular.svg";
 
 const Dashboard = () => {
-	const { studentsList, setStudentsList, setShowErrorMessage, setError } =
-		useContextProvider();
+	const { studentsList } = useContextProvider();
 	const { getStudentsList } = useFunctions();
 	const [totalPresent, setTotalPresent] = useState(0);
 	const [totalAbsent, setTotalAbsent] = useState(0);
@@ -27,7 +26,7 @@ const Dashboard = () => {
 		return { totalAbsent, totalPresent };
 	};
 	useEffect(() => {
-		getStudentsList(setStudentsList, setShowErrorMessage, setError);
+		// getStudentsList(setStudentsList, setShowErrorMessage, setError, userData.groupid);
 
 		calculateTotals();
 
