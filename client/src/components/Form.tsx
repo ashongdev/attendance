@@ -12,7 +12,7 @@ interface Props {
 	mode: Mode;
 	setMode: Dispatch<SetStateAction<Mode>>;
 	label: string;
-	editdata?: Omit<Student, "present_status">;
+	editdata?: Omit<Student, "present_status" | "attendance_date">;
 	setError: Dispatch<SetStateAction<{ header: string; description: string }>>;
 }
 
@@ -54,7 +54,9 @@ const Form: FC<Props> = ({
 		resolver: yupResolver(Schema),
 	});
 
-	const submitHandler = async (data: Omit<Student, "present_status">) => {
+	const submitHandler = async (
+		data: Omit<Student, "present_status" | "attendance_date">
+	) => {
 		if (!data) {
 			alert("No data provided for this provided.");
 			return;

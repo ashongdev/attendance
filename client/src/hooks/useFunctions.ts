@@ -44,7 +44,7 @@ const useFunctions = () => {
 
 	const editStudentInfo = async (
 		index_number: string,
-		data: Omit<Student, "present_status">,
+		data: Omit<Student, "present_status" | "attendance_date">,
 		getter: Student[],
 		valueSetter: Dispatch<SetStateAction<Student[]>>,
 		modalSetter: Dispatch<SetStateAction<boolean>>,
@@ -113,8 +113,44 @@ const useFunctions = () => {
 		}
 	};
 
+	const getStudentsAttendanceList = async (
+		setter: Dispatch<SetStateAction<Student[]>>,
+		errorPopupSetter: Dispatch<SetStateAction<boolean>>,
+		errorSetter: Dispatch<
+			SetStateAction<{ header: string; description: string }>
+		>,
+		groupid: GroupID | undefined
+	) => {
+		if (!groupid) return;
+
+		try {
+			const res = await Axios.get(
+				`http://localhost:4002/lec/students/attendance/${groupid}`
+			);
+
+			if (!res.data) {
+				return alert("An Unexpected error occurred. Please try again.");
+			}
+
+			setter(res.data);
+		} catch (error: any) {
+			errorPopupSetter(true);
+			if (error.status === 429) {
+				errorSetter({
+					header: "Could not retrieve data",
+					description: "Too many requests, please try again later.",
+				});
+			} else {
+				errorSetter({
+					header: "An unexpected error occurred.",
+					description: "Please try again.",
+				});
+			}
+		}
+	};
+
 	const addStudent = async (
-		data: Student,
+		data: Omit<Student, "present_status" | "attendance_date">,
 		alertPopupSetter: Dispatch<SetStateAction<boolean>>,
 		valueSetter: Dispatch<SetStateAction<Student[]>>,
 		modalSetter: Dispatch<SetStateAction<boolean>>,
@@ -237,6 +273,7 @@ const useFunctions = () => {
 		addStudent,
 		removeStudent,
 		clearTimer,
+		getStudentsAttendanceList,
 	};
 };
 

@@ -8,7 +8,7 @@ interface Props {
 	setShowErrorMessage: Dispatch<SetStateAction<boolean>>;
 	mode: Mode;
 	setMode: Dispatch<SetStateAction<Mode>>;
-	editData?: Omit<Student, "present_status">;
+	editData?: Omit<Student, "present_status" | "attendance_date">;
 	setError: Dispatch<SetStateAction<{ header: string; description: string }>>;
 }
 

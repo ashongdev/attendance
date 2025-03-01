@@ -52,7 +52,10 @@ const editStudentInfo = async (req: Request, res: Response) => {
 	}
 };
 
-const getStudents = async (req: Request, res: Response): Promise<void> => {
+const getStudentsAttendanceList = async (
+	req: Request,
+	res: Response
+): Promise<void> => {
 	const { groupid } = req.params;
 
 	if (!groupid) {
@@ -62,17 +65,36 @@ const getStudents = async (req: Request, res: Response): Promise<void> => {
 
 	try {
 		const response = await pool.query(
-			`SELECT DISTINCT ON (S.INDEX_NUMBER) A.PRESENT_STATUS, INDEX_NUMBER, FULLNAME, GROUPID, EMAIL, DATE_OF_BIRTH FROM STUDENTS AS S
-			INNER JOIN ATTENDANCE AS A
+			`SELECT DISTINCT ON (S.INDEX_NUMBER) A.PRESENT_STATUS, A.ATTENDANCE_DATE, INDEX_NUMBER, FULLNAME, GROUPID, EMAIL, DATE_OF_BIRTH FROM STUDENTS AS S
+			LEFT JOIN ATTENDANCE AS A
 			ON S.INDEX_NUMBER = A.STUDENT_ID
-				AND DATE(A.ATTENDANCE_DATE) = DATE($1)
-			WHERE S.GROUPID = $2 ORDER BY S.INDEX_NUMBER, A.ATTENDANCE_DATE DESC`,
-			[new Date(), groupid]
+			WHERE S.GROUPID = $1 ORDER BY S.INDEX_NUMBER, A.ATTENDANCE_DATE DESC`,
+			[groupid]
 		);
 
 		res.json(response.rows);
 	} catch (error) {
-		console.log("🚀 ~ getStudents ~ error:", error);
+		console.log("🚀 ~ getStudentsList ~ error:", error);
+		res.json(error);
+	}
+};
+const getStudentsList = async (req: Request, res: Response): Promise<void> => {
+	const { groupid } = req.params;
+
+	if (!groupid) {
+		res.status(404).json({ message: "Group ID is required" });
+		return;
+	}
+
+	try {
+		const response = await pool.query(
+			"SELECT FULLNAME, EMAIL, GROUPID, INDEX_NUMBER FROM STUDENTS WHERE GROUPID = $1 ORDER BY STUDENT_ID",
+			[groupid]
+		);
+
+		res.json(response.rows);
+	} catch (error) {
+		console.log("🚀 ~ getStudentsList ~ error:", error);
 		res.json(error);
 	}
 };
@@ -146,10 +168,6 @@ const signup = async (req: Request, res: Response) => {
 		faculty,
 		no_of_groups,
 		password,
-		group1,
-		group2,
-		group3,
-		group4,
 	} = req.body;
 
 	try {
@@ -191,6 +209,9 @@ const generateCode = async (req: Request, res: Response): Promise<void> => {
 };
 
 const tickAttendance = async (req: Request, res: Response): Promise<void> => {
+	if (!req.body)
+		res.status(403).json({ error: "No data provided for this operation" });
+
 	const { present_status, index_number, groupid } = req.body;
 
 	try {
@@ -199,12 +220,12 @@ const tickAttendance = async (req: Request, res: Response): Promise<void> => {
 			[index_number, new Date()]
 		);
 
-		if (checkID.rowCount === 1) {
+		if (checkID.rows.length === 1) {
 			await pool.query(
 				`UPDATE ATTENDANCE SET PRESENT_STATUS = $1, ATTENDANCE_DATE = $2 WHERE STUDENT_ID = $3`,
 				[present_status, new Date(), index_number]
 			);
-		} else if (!checkID.rowCount) {
+		} else if (checkID.rows.length < 1) {
 			const randomUUID = uuid();
 			await pool.query(
 				`INSERT INTO ATTENDANCE (ATTENDANCE_ID, STUDENT_ID, PRESENT_STATUS) VALUES($1, $2, $3)`,
@@ -212,11 +233,11 @@ const tickAttendance = async (req: Request, res: Response): Promise<void> => {
 			);
 		}
 		const response = await pool.query(
-			`SELECT DISTINCT ON (S.INDEX_NUMBER) PRESENT_STATUS, INDEX_NUMBER, FULLNAME, GROUPID, EMAIL, DATE_OF_BIRTH FROM STUDENTS AS S
-			INNER JOIN ATTENDANCE AS A
-			ON DATE(A.ATTENDANCE_DATE) = DATE($1)
-			WHERE S.GROUPID = $2`,
-			[new Date(), groupid]
+			`SELECT DISTINCT ON (S.INDEX_NUMBER) A.PRESENT_STATUS, A.ATTENDANCE_DATE, INDEX_NUMBER, FULLNAME, GROUPID, EMAIL, DATE_OF_BIRTH FROM STUDENTS AS S
+			LEFT JOIN ATTENDANCE AS A
+			ON S.INDEX_NUMBER = A.STUDENT_ID
+			WHERE S.GROUPID = $1 ORDER BY S.INDEX_NUMBER, A.ATTENDANCE_DATE DESC`,
+			[groupid]
 		);
 		res.status(201).json(response.rows);
 	} catch (err: any) {
@@ -233,7 +254,8 @@ export {
 	authenticate,
 	editStudentInfo,
 	generateCode,
-	getStudents,
+	getStudentsAttendanceList,
+	getStudentsList,
 	removeStudent,
 	signup,
 	tickAttendance,

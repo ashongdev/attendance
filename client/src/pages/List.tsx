@@ -33,7 +33,7 @@ const List: FC<Props> = ({ changePage }) => {
 	} = useContextProvider();
 
 	const [studentToBeEdited, setStudentToBeEdited] = useState<
-		Omit<Student, "present_status">
+		Omit<Student, "present_status" | "attendance_date" | "attendance_date">
 	>({ fullname: "", index_number: "", groupid: "", email: "" });
 
 	const getStudentInfo = (index_number: string) => {

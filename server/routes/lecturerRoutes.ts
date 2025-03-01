@@ -5,7 +5,8 @@ import {
 	authenticate,
 	editStudentInfo,
 	generateCode,
-	getStudents,
+	getStudentsAttendanceList,
+	getStudentsList,
 	removeStudent,
 	signup,
 	tickAttendance,
@@ -23,7 +24,8 @@ const limiter = RateLimit({
 router.use(limiter);
 
 router.get("/lec/auth/:key", authenticate);
-router.get("/lec/students/:groupid", getStudents);
+router.get("/lec/students/:groupid", getStudentsList);
+router.get("/lec/students/attendance/:groupid", getStudentsAttendanceList);
 router.get("/lec/verify", generateCode);
 
 router.post("/lec/add-student", addStudent);

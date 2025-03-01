@@ -41,6 +41,7 @@ type Student = {
 	groupid: GroupID;
 	email: string;
 	present_status?: boolean | null;
+	attendance_date: Date;
 };
 
 type Lecturer = {

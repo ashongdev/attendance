@@ -1,4 +1,5 @@
 import Axios from "axios";
+import { formatDate } from "date-fns";
 import { FC, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ErrorAlert from "../components/ErrorAlert";
@@ -11,16 +12,9 @@ interface Props {
 }
 
 const Attendance: FC<Props> = ({ changePage }) => {
-	const { getStudentsList, getStorageItem } = useFunctions();
-	const {
-		studentsList,
-		setStudentsList,
-		setShowErrorMessage,
-		showErrorMessage,
-		setError,
-		error,
-		userData,
-	} = useContextProvider();
+	const { getStudentsAttendanceList, getStorageItem } = useFunctions();
+	const { setShowErrorMessage, showErrorMessage, setError, error, userData } =
+		useContextProvider();
 
 	const [filterGroupID, setFilterGroupID] = useState<GroupID | undefined>(
 		getStorageItem("filterGroupID", null)
@@ -29,7 +23,7 @@ const Attendance: FC<Props> = ({ changePage }) => {
 
 	// Filter by group
 	const filterStudents = (groupid: GroupID | undefined) => {
-		const filteredStudents = studentsList.filter(
+		const filteredStudents = attendanceList.filter(
 			(student) => student.groupid === groupid
 		);
 		setFilterStudentList(filteredStudents);
@@ -39,25 +33,33 @@ const Attendance: FC<Props> = ({ changePage }) => {
 		studentDetails: Student,
 		present_status: Status
 	) => {
+		if (!studentDetails) {
+			return alert("No data provided for this operation");
+		}
+
 		if (present_status === true || present_status === false) {
 			try {
+				const body = {
+					index_number: studentDetails.index_number,
+					present_status,
+					groupid: studentDetails.groupid,
+				};
 				const updatedList = await Axios.put(
 					"http://localhost:4002/lec/tick_attendance",
-					{
-						index_number: studentDetails.index_number,
-						present_status,
-						groupid: studentDetails.groupid,
-					}
+					body
 				);
 
-				setStudentsList([]);
-				setStudentsList(updatedList.data);
-			} catch (error) {
+				setAttendanceList(updatedList.data);
+			} catch (error: any) {
 				console.log("🚀 ~ error:", error);
-				alert("An unexpected error occurred");
+				if (error) {
+					const { data: err } = error.data;
+					alert(err);
+				}
 			}
 		}
 	};
+	const [attendanceList, setAttendanceList] = useState<Student[]>([]);
 
 	useEffect(() => {
 		let { href: navigateTo } = window.location;
@@ -78,9 +80,10 @@ const Attendance: FC<Props> = ({ changePage }) => {
 
 		localStorage.setItem("filterGroupID", JSON.stringify(filterGroupID));
 
-		userData &&
-			getStudentsList(
-				setStudentsList,
+		filterGroupID &&
+			userData &&
+			getStudentsAttendanceList(
+				setAttendanceList,
 				setShowErrorMessage,
 				setError,
 				filterGroupID
@@ -90,6 +93,55 @@ const Attendance: FC<Props> = ({ changePage }) => {
 	useEffect(() => {
 		userData && setFilterGroupID(userData?.group1);
 	}, []);
+
+	const renderStudentRow = (student: Student, index: number) => (
+		<tr key={student.index_number}>
+			<td>{index + 1}</td>
+			<td>{student.index_number}</td>
+			<td>{student.fullname}</td>
+			<td>{student.email}</td>
+			<td>{student.groupid}</td>
+			<td>
+				<div>
+					<input
+						type="radio"
+						name={`status${student.index_number}`}
+						defaultChecked={
+							student.attendance_date
+								? formatDate(
+										new Date(student.attendance_date),
+										"EEE LLL dd yyyy"
+								  ) ===
+								  formatDate(new Date(), "EEE LLL dd yyyy")
+									? student.present_status === true
+									: false
+								: false
+						}
+						onChange={() => changeStudentStatus(student, true)}
+					/>
+					<span>Present</span>
+				</div>
+				<div>
+					<input
+						type="radio"
+						name={`status${student.index_number}`}
+						defaultChecked={
+							student &&
+							student.attendance_date &&
+							formatDate(
+								new Date(student.attendance_date),
+								"EEE LLL dd yyyy"
+							) === formatDate(new Date(), "EEE LLL dd yyyy")
+								? student.present_status === false
+								: false
+						}
+						onChange={() => changeStudentStatus(student, false)}
+					/>
+					<span>Absent</span>
+				</div>
+			</td>
+		</tr>
+	);
 
 	return (
 		<section className="list-section">
@@ -167,98 +219,9 @@ const Attendance: FC<Props> = ({ changePage }) => {
 						</tr>
 					</thead>
 					<tbody>
-						{filteredStudentList.length <= 0
-							? studentsList.length > 0 &&
-							  studentsList.map((student, index) => (
-									<tr key={student.index_number}>
-										<td>{index + 1}</td>
-										<td>{student.index_number}</td>
-										<td>{student.fullname}</td>
-										<td>{student.email}</td>
-										<td>{student.groupid}</td>
-										<td>
-											<div>
-												<input
-													type="radio"
-													name={`status${student.index_number}`}
-													defaultChecked={
-														student.present_status ===
-														true
-													}
-													onChange={() => {
-														changeStudentStatus(
-															student,
-															true
-														);
-													}}
-												/>
-												<span>Present</span>
-											</div>
-											<div>
-												<input
-													type="radio"
-													name={`status${student.index_number}`}
-													defaultChecked={
-														student.present_status ===
-															false && true
-													}
-													onChange={(e) => {
-														changeStudentStatus(
-															student,
-															false
-														);
-													}}
-												/>
-												<span>Absent</span>
-											</div>
-										</td>
-									</tr>
-							  ))
-							: filteredStudentList.map((student) => (
-									<tr key={student.index_number}>
-										<td>{student.index_number}</td>
-										<td>{student.index_number}</td>
-										<td>{student.fullname}</td>
-										<td>{student.email}</td>
-										<td>{student.groupid}</td>
-										<td>
-											<div>
-												<input
-													type="radio"
-													name={`status${student.index_number}`}
-													defaultChecked={
-														student.present_status ===
-														true
-													}
-													onChange={() => {
-														changeStudentStatus(
-															student,
-															true
-														);
-													}}
-												/>
-												<span>Present</span>
-											</div>
-											<div>
-												<input
-													type="radio"
-													name={`status${student.index_number}`}
-													defaultChecked={
-														student.present_status ===
-															false && true
-													}
-													onChange={() => {
-														changeStudentStatus(
-															student,
-															false
-														);
-													}}
-												/>
-												<span>Absent</span>
-											</div>
-										</td>
-									</tr>
-							  ))}
+						{filteredStudentList.length > 0
+							? filteredStudentList.map(renderStudentRow)
+							: attendanceList.map(renderStudentRow)}
 					</tbody>
 				</table>
 			</div>
