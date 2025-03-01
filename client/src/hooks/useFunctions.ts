@@ -44,7 +44,7 @@ const useFunctions = () => {
 
 	const editStudentInfo = async (
 		index_number: string,
-		data: Omit<Student, "status">,
+		data: Omit<Student, "present_status">,
 		getter: Student[],
 		valueSetter: Dispatch<SetStateAction<Student[]>>,
 		modalSetter: Dispatch<SetStateAction<boolean>>,
@@ -236,7 +236,6 @@ const useFunctions = () => {
 		editStudentInfo,
 		addStudent,
 		removeStudent,
-		setterFunc,
 		clearTimer,
 	};
 };

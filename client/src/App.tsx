@@ -1,13 +1,18 @@
-import { useState } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { ReactNode, useState } from "react";
+import {
+	createBrowserRouter,
+	Navigate,
+	RouterProvider,
+} from "react-router-dom";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
-import { Page } from "./exports/exports.ts";
+import useContextProvider from "./hooks/useContextProvider.ts";
 import useFunctions from "./hooks/useFunctions.ts";
-import Attendance from "./pages/Attendance";
+import Attendance from "./pages/Attendance.tsx";
 import Dashboard from "./pages/Dashboard";
 import LecSignup from "./pages/LecSignup.tsx";
 import List from "./pages/List";
+import PageNotFound from "./pages/PageNotFound.tsx";
 
 // !Download Oh MY ZSH for my terminal
 // todo: Add loader styles to css
@@ -15,74 +20,94 @@ import List from "./pages/List";
 // !restrict student from checking in if detaild from localstorage matches the new one
 
 // !rnfz
+const RenderSideBar = ({ children }: { children: ReactNode }) => {
+	const [showSideBar, setShowSideBar] = useState(false);
+	const { changePage, page } = useContextProvider();
+
+	return (
+		<main style={{ marginLeft: showSideBar ? "15rem" : "0rem" }}>
+			<Header setShowSideBar={setShowSideBar} />
+			{showSideBar && <Sidebar changePage={changePage} page={page} />}
+			{children}
+		</main>
+	);
+};
 const App = () => {
 	const { getStorageItem } = useFunctions();
-
-	const [page, setPage] = useState<Page>(getStorageItem("page", null));
-	const [showSideBar, setShowSideBar] = useState(false);
-
-	const changePage = (page: Page) => {
-		setPage(page);
-		localStorage.setItem("page", JSON.stringify(page));
-	};
+	const { changePage } = useContextProvider();
 
 	const userData = getStorageItem("userData", null);
 
+	const router = createBrowserRouter(
+		[
+			{
+				path: "/",
+				element: userData ? (
+					<RenderSideBar>
+						<Dashboard />
+					</RenderSideBar>
+				) : (
+					<Navigate to="/signup" />
+				),
+			},
+			{
+				path: "/list",
+				element: userData ? (
+					<>
+						<RenderSideBar>
+							<List changePage={changePage} />
+						</RenderSideBar>
+					</>
+				) : (
+					<Navigate to="/signup" />
+				),
+			},
+			{
+				path: "/attendance",
+				element: userData ? (
+					<>
+						<RenderSideBar>
+							<Attendance changePage={changePage} />
+						</RenderSideBar>
+					</>
+				) : (
+					<Navigate to="/signup" />
+				),
+			},
+			{
+				path: "signup",
+				element: !userData ? (
+					<>
+						<RenderSideBar>
+							<LecSignup />
+						</RenderSideBar>
+					</>
+				) : (
+					<Navigate to="/" />
+				),
+			},
+			{
+				path: "*",
+				element: (
+					<RenderSideBar>
+						<PageNotFound />
+					</RenderSideBar>
+				),
+			},
+		],
+		{
+			future: {
+				v7_relativeSplatPath: true, // Enables relative paths in nested routes
+				v7_fetcherPersist: true, // Retains fetcher state during navigation
+				v7_normalizeFormMethod: true, // Normalizes form methods (e.g., POST or GET)
+				v7_partialHydration: true, // Supports partial hydration for server-side rendering
+				v7_skipActionErrorRevalidation: true, // Prevents revalidation when action errors occur
+			},
+		}
+	);
+
 	return (
-		<>
-			{showSideBar && <Sidebar changePage={changePage} page={page} />}
-
-			{/* Add the slide in animations */}
-			{/* Add Loading animations for operations performed: fetching students, updating, removing etc */}
-			<main style={{ marginLeft: showSideBar ? "15rem" : "0rem" }}>
-				<Header setShowSideBar={setShowSideBar} />
-
-				<Routes>
-					<Route
-						path="/"
-						element={
-							userData ? <Dashboard /> : <Navigate to="/signup" />
-						}
-					/>
-					<Route
-						path="/list"
-						element={
-							userData ? (
-								<List changePage={changePage} />
-							) : (
-								<Navigate to="/signup" />
-							)
-						}
-					/>
-					<Route
-						path="/attendance"
-						element={
-							userData ? (
-								<Attendance changePage={changePage} />
-							) : (
-								<Navigate to="/signup" />
-							)
-						}
-					/>
-					<Route
-						path="/signup"
-						element={
-							!userData ? <LecSignup /> : <Navigate to="/" />
-						}
-					/>
-
-					<Route
-						path="*"
-						element={
-							<section>
-								<h1>NOT FOUND</h1>
-							</section>
-						}
-					/>
-				</Routes>
-			</main>
-			{/* <Footer /> */}
-		</>
+		<RouterProvider router={router} future={{ v7_startTransition: true }} />
 	);
 };
 

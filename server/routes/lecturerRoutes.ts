@@ -8,6 +8,7 @@ import {
 	getStudents,
 	removeStudent,
 	signup,
+	tickAttendance,
 } from "../controllers/lecturerController";
 
 export const router = Router();
@@ -32,5 +33,6 @@ router.delete("/lec/rem-student/:id", removeStudent);
 
 // router.post("/register-course", registerCourse);
 router.patch("/lec/edit", editStudentInfo);
+router.put("/lec/tick_attendance", tickAttendance);
 
 export default router;

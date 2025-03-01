@@ -1,5 +1,11 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
-import { ContextProvider, Lecturer, Mode, Student } from "../exports/exports";
+import {
+	ContextProvider,
+	Lecturer,
+	Mode,
+	Page,
+	Student,
+} from "../exports/exports";
 import useFunctions from "../hooks/useFunctions";
 
 // const socket = io("http://localhost:4000");
@@ -24,8 +30,8 @@ const Context = ({ children }: { children: ReactNode }) => {
 		description: "",
 	});
 	const [openModal, setOpenModal] = useState(false);
+	const [page, setPage] = useState<Page>(getStorageItem("page", null));
 
-	const timeoutId = useRef<NodeJS.Timeout | null>(null);
 	const alertTimeout = useRef<NodeJS.Timeout | null>(null);
 	const errorTimeout = useRef<NodeJS.Timeout | null>(null);
 
@@ -54,6 +60,10 @@ const Context = ({ children }: { children: ReactNode }) => {
 		};
 	}, [showAlertPopup, showErrorMessage]);
 
+	const changePage = (page: Page) => {
+		setPage(page);
+		localStorage.setItem("page", JSON.stringify(page));
+	};
 	return (
 		<ContextProvider.Provider
 			value={{
@@ -72,6 +82,9 @@ const Context = ({ children }: { children: ReactNode }) => {
 				setOpenModal,
 				userData,
 				setUserData,
+				page,
+				setPage,
+				changePage,
 			}}
 		>
 			{children}

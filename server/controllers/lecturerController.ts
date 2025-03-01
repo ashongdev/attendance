@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import { v4 as uuid } from "uuid";
 import { pool } from "../db";
 
-const handleErrors = (errors: any) => {
+const handleErrors = async (errors: any) => {
 	let errMsg;
 	if (
 		errors.message.includes(
@@ -62,11 +62,17 @@ const getStudents = async (req: Request, res: Response): Promise<void> => {
 
 	try {
 		const response = await pool.query(
-			"SELECT FULLNAME, EMAIL, GROUPID, INDEX_NUMBER FROM STUDENTS WHERE GROUPID = $1 ORDER BY STUDENT_ID",
-			[groupid]
+			`SELECT DISTINCT ON (S.INDEX_NUMBER) A.PRESENT_STATUS, INDEX_NUMBER, FULLNAME, GROUPID, EMAIL, DATE_OF_BIRTH FROM STUDENTS AS S
+			INNER JOIN ATTENDANCE AS A
+			ON S.INDEX_NUMBER = A.STUDENT_ID
+				AND DATE(A.ATTENDANCE_DATE) = DATE($1)
+			WHERE S.GROUPID = $2 ORDER BY S.INDEX_NUMBER, A.ATTENDANCE_DATE DESC`,
+			[new Date(), groupid]
 		);
+
 		res.json(response.rows);
 	} catch (error) {
+		console.log("🚀 ~ getStudents ~ error:", error);
 		res.json(error);
 	}
 };
@@ -102,7 +108,7 @@ const addStudent = async (req: Request, res: Response): Promise<void> => {
 		);
 		res.json(response.rows);
 	} catch (err) {
-		const errors = handleErrors(err);
+		const errors = await handleErrors(err);
 		res.status(403).json(errors);
 	}
 };
@@ -163,7 +169,7 @@ const signup = async (req: Request, res: Response) => {
 			]
 		);
 	} catch (err) {
-		const error = handleErrors(err);
+		const error = await handleErrors(err);
 		res.status(403).json(error);
 	}
 };
@@ -184,6 +190,42 @@ const generateCode = async (req: Request, res: Response): Promise<void> => {
 	}
 };
 
+const tickAttendance = async (req: Request, res: Response): Promise<void> => {
+	const { present_status, index_number, groupid } = req.body;
+
+	try {
+		const checkID = await pool.query(
+			`SELECT STUDENT_ID, ATTENDANCE_DATE FROM ATTENDANCE WHERE STUDENT_ID = $1 AND DATE(ATTENDANCE_DATE) = DATE($2)`,
+			[index_number, new Date()]
+		);
+
+		if (checkID.rowCount === 1) {
+			await pool.query(
+				`UPDATE ATTENDANCE SET PRESENT_STATUS = $1, ATTENDANCE_DATE = $2 WHERE STUDENT_ID = $3`,
+				[present_status, new Date(), index_number]
+			);
+		} else if (!checkID.rowCount) {
+			const randomUUID = uuid();
+			await pool.query(
+				`INSERT INTO ATTENDANCE (ATTENDANCE_ID, STUDENT_ID, PRESENT_STATUS) VALUES($1, $2, $3)`,
+				[randomUUID, index_number, present_status]
+			);
+		}
+		const response = await pool.query(
+			`SELECT DISTINCT ON (S.INDEX_NUMBER) PRESENT_STATUS, INDEX_NUMBER, FULLNAME, GROUPID, EMAIL, DATE_OF_BIRTH FROM STUDENTS AS S
+			INNER JOIN ATTENDANCE AS A
+			ON DATE(A.ATTENDANCE_DATE) = DATE($1)
+			WHERE S.GROUPID = $2`,
+			[new Date(), groupid]
+		);
+		res.status(201).json(response.rows);
+	} catch (err: any) {
+		const error = await handleErrors(err);
+		console.log("🚀 ~ tickAttendance ~ error:", err.message);
+		res.status(400).json(error);
+	}
+};
+
 const authenticate = async (req: Request, res: Response): Promise<void> => {};
 
 export {
@@ -194,4 +236,5 @@ export {
 	getStudents,
 	removeStudent,
 	signup,
+	tickAttendance,
 };

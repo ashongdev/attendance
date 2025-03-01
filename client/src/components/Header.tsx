@@ -1,8 +1,7 @@
-import { Link } from "react-router-dom";
+import { Dispatch, FC, SetStateAction } from "react";
 import useFunctions from "../hooks/useFunctions";
 import menuIcon from "../images/reorder-three-outline.svg";
 import personIcon from "../images/user-regular.svg";
-import { Dispatch, FC, SetStateAction } from "react";
 
 interface Props {
 	setShowSideBar: Dispatch<SetStateAction<boolean>>;

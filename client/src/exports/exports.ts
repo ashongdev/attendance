@@ -25,6 +25,9 @@ interface ContextType {
 	setUserData: Dispatch<
 		SetStateAction<Omit<Lecturer, "confirmPassword"> | null>
 	>;
+	page: Page;
+	setPage: Dispatch<SetStateAction<Page>>;
+	changePage: (val: Page) => void;
 }
 
 const ContextProvider = createContext<ContextType | undefined>(undefined);
@@ -37,7 +40,7 @@ type Student = {
 	fullname: string;
 	groupid: GroupID;
 	email: string;
-	status?: boolean | null;
+	present_status?: boolean | null;
 };
 
 type Lecturer = {
@@ -58,6 +61,6 @@ type Lecturer = {
 
 type GroupID = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "";
 
-type Status = "Present" | "Absent";
+type Status = boolean;
 
 export { ContextProvider, GroupID, Lecturer, Mode, Page, Status, Student };

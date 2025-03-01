@@ -1,3 +1,4 @@
+import Axios from "axios";
 import { FC, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ErrorAlert from "../components/ErrorAlert";
@@ -21,12 +22,10 @@ const Attendance: FC<Props> = ({ changePage }) => {
 		userData,
 	} = useContextProvider();
 
-	const [clickedStudent, setClickedStudent] = useState("");
 	const [filterGroupID, setFilterGroupID] = useState<GroupID | undefined>(
 		getStorageItem("filterGroupID", null)
 	);
 	const [filteredStudentList, setFilterStudentList] = useState<Student[]>([]);
-	const [studentStatus, setStudentStatus] = useState<Status | null>(null);
 
 	// Filter by group
 	const filterStudents = (groupid: GroupID | undefined) => {
@@ -36,29 +35,32 @@ const Attendance: FC<Props> = ({ changePage }) => {
 		setFilterStudentList(filteredStudents);
 	};
 
-	// Update status Present/Absent
 	const changeStudentStatus = async (
-		index_number: string,
-		status: Status
+		studentDetails: Student,
+		present_status: Status
 	) => {
-		// Retrieve student index_number and set status
-		setClickedStudent(index_number);
-		setStudentStatus(status);
+		if (present_status === true || present_status === false) {
+			try {
+				const updatedList = await Axios.put(
+					"http://localhost:4002/lec/tick_attendance",
+					{
+						index_number: studentDetails.index_number,
+						present_status,
+						groupid: studentDetails.groupid,
+					}
+				);
+
+				setStudentsList([]);
+				setStudentsList(updatedList.data);
+			} catch (error) {
+				console.log("🚀 ~ error:", error);
+				alert("An unexpected error occurred");
+			}
+		}
 	};
 
 	useEffect(() => {
-		const student = studentsList.findIndex(
-			(std) => std.index_number === clickedStudent
-		);
-		if (studentStatus === "Present") {
-			studentsList[student].status = true;
-		} else if (studentStatus === "Absent") {
-			studentsList[student].status = false;
-		}
-	}, [studentStatus]);
-
-	let { href: navigateTo } = window.location;
-	useEffect(() => {
+		let { href: navigateTo } = window.location;
 		filterStudents(filterGroupID);
 
 		if (userData)
@@ -180,12 +182,13 @@ const Attendance: FC<Props> = ({ changePage }) => {
 													type="radio"
 													name={`status${student.index_number}`}
 													defaultChecked={
-														student.status === true
+														student.present_status ===
+														true
 													}
 													onChange={() => {
 														changeStudentStatus(
-															student.index_number,
-															"Present"
+															student,
+															true
 														);
 													}}
 												/>
@@ -196,12 +199,13 @@ const Attendance: FC<Props> = ({ changePage }) => {
 													type="radio"
 													name={`status${student.index_number}`}
 													defaultChecked={
-														student.status === false
+														student.present_status ===
+															false && true
 													}
 													onChange={(e) => {
 														changeStudentStatus(
-															student.index_number,
-															"Absent"
+															student,
+															false
 														);
 													}}
 												/>
@@ -223,12 +227,13 @@ const Attendance: FC<Props> = ({ changePage }) => {
 													type="radio"
 													name={`status${student.index_number}`}
 													defaultChecked={
-														student.status === true
+														student.present_status ===
+														true
 													}
 													onChange={() => {
 														changeStudentStatus(
-															student.index_number,
-															"Present"
+															student,
+															true
 														);
 													}}
 												/>
@@ -239,12 +244,13 @@ const Attendance: FC<Props> = ({ changePage }) => {
 													type="radio"
 													name={`status${student.index_number}`}
 													defaultChecked={
-														student.status === false
+														student.present_status ===
+															false && true
 													}
 													onChange={() => {
 														changeStudentStatus(
-															student.index_number,
-															"Absent"
+															student,
+															false
 														);
 													}}
 												/>

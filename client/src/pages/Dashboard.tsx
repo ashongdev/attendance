@@ -7,7 +7,13 @@ import absentIcon from "../images/close-circle-outline.svg";
 import personIcon from "../images/user-regular.svg";
 
 const Dashboard = () => {
-	const { studentsList } = useContextProvider();
+	const {
+		studentsList,
+		setStudentsList,
+		setShowErrorMessage,
+		setError,
+		userData,
+	} = useContextProvider();
 	const { getStudentsList } = useFunctions();
 	const [totalPresent, setTotalPresent] = useState(0);
 	const [totalAbsent, setTotalAbsent] = useState(0);
@@ -15,9 +21,9 @@ const Dashboard = () => {
 
 	const calculateTotals = () => {
 		studentsList.forEach((std) => {
-			if (std.status === true) {
+			if (std.present_status === true) {
 				setTotalPresent((prev) => prev + 1);
-			} else if (std.status === false) {
+			} else if (std.present_status === false) {
 				setTotalAbsent((prev) => prev + 1);
 			} else {
 				setTotalNotMarked((prev) => prev + 1);
@@ -26,7 +32,13 @@ const Dashboard = () => {
 		return { totalAbsent, totalPresent };
 	};
 	useEffect(() => {
-		// getStudentsList(setStudentsList, setShowErrorMessage, setError, userData.groupid);
+		// Get students for all courses the lecturer teaches
+		// getStudentsList(
+		// 	setStudentsList,
+		// 	setShowErrorMessage,
+		// 	setError,
+		// 	userData.groupid
+		// );
 
 		calculateTotals();
 
