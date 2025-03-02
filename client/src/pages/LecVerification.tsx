@@ -1,6 +1,4 @@
-import emailjs from "@emailjs/browser";
 import Axios from "axios";
-import { compare, genSalt, hash } from "bcryptjs";
 import {
 	ClipboardEvent,
 	Dispatch,
@@ -11,6 +9,7 @@ import {
 	useState,
 } from "react";
 import { Link } from "react-router-dom";
+import ErrorAlert from "../components/ErrorAlert";
 import SuccessAlert from "../components/SuccessAlert";
 import useContextProvider from "../hooks/useContextProvider";
 import useFunctions from "../hooks/useFunctions";
@@ -25,133 +24,182 @@ interface Props {
 
 const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
 	const { getStorageItem } = useFunctions();
-	const { setShowAlertPopup, showAlertPopup, userData } =
-		useContextProvider();
+	const {
+		setShowAlertPopup,
+		showAlertPopup,
+		userData,
+		setTimeLeft,
+		minutes,
+		seconds,
+	} = useContextProvider();
 	const { handleInput, handleKeyDown, handlePaste } = useInputFunctions();
 
 	const [showTextBox, setShowTextBox] = useState(false);
-	const [showVerificationErr, setShowVerificationErr] = useState<
-		boolean | "clear"
-	>(false);
+	const [showVerificationErr, setShowVerificationErr] =
+		useState<boolean>(false);
+	const [showVerifyButton, setShowVerifyButton] = useState<boolean>(false);
+	const [verificationErr, setVerificationErr] = useState({
+		header: "",
+		description: "",
+	});
 	const [code, setCode] = useState("");
-	const [timeLeft, setTimeLeft] = useState(5 * 60); // 5 minutes in seconds
-	const minutes = Math.floor(timeLeft / 60);
-	const seconds = timeLeft % 60;
-	const timerRef = useRef<number | null>(null);
+	const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-	const generateCode = async () => {
+	const generateCode = async (userEmail: string) => {
 		try {
 			const res = await Axios.get(
-				"https://record-attendance.onrender.com/lec/verify"
+				`https://record-attendance/.onrender.com/lec/verify/${userEmail}`,
+				// `http://localhost:4002/lec/verify/${userEmail}`,
+				{ params: userData }
 			);
 			if (!res.data) return alert("An unexpected error occurred!");
 
-			setCode(res.data);
-			setTimeLeft(5 * 60); // Reset timer back to 5 minutes
+			if (res.data.ok) {
+				setShowVerifyButton(true);
+				const endTime = Date.now() + 5 * 60 * 1000;
 
-			const endTime = Date.now() + 5 * 60 * 1000;
+				setTimeLeft(5 * 60); // Reset timer back to 5 minutes
+				const updateTimer = () => {
+					const secondsLeft = Math.round(
+						(endTime - Date.now()) / 1000
+					);
+					setTimeLeft(Math.max(secondsLeft, 0));
 
-			const updateTimer = () => {
-				const secondsLeft = Math.round((endTime - Date.now()) / 1000);
-				setTimeLeft(Math.max(secondsLeft, 0));
+					if (secondsLeft <= 0 && timerRef.current) {
+						clearInterval(timerRef.current);
+					}
+				};
 
-				if (secondsLeft <= 0 && timerRef.current) {
+				if (timerRef.current) {
 					clearInterval(timerRef.current);
 				}
-			};
 
-			if (timerRef.current) {
-				clearInterval(timerRef.current);
+				timerRef.current = setInterval(updateTimer, 1000);
+				updateTimer();
 			}
+		} catch (error: any) {
+			setShowVerificationErr(true);
+			setVerificationErr({
+				header: "Unexpected Error",
+				description: "An unexpected error occurredd. Please try again.",
+			});
 
-			timerRef.current = setInterval(
-				updateTimer,
-				1000
-			) as unknown as number;
-			updateTimer();
-		} catch (error) {}
+			return;
+		}
 	};
 
-	const s = getStorageItem("s", null);
 	useEffect(() => {
 		if (minutes === 0 && seconds === 0) {
 			localStorage.removeItem("s");
 		}
 	}, [minutes, seconds]);
+	// useEffect(() => {
+	// 	console.log(code);
+	// }, [code]);
 
-	const sendCode = async () => {
-		const salt = await genSalt(10);
-		const hashed = await hash(code, salt);
+	// const sendCode = async () => {
+	// 	const salt = await genSalt(10);
+	// 	const hashed = await hash(code, salt);
 
-		localStorage.setItem("s", JSON.stringify(hashed));
-		const params = {
-			to_name: userData?.fullname,
-			message: code,
-			to_email: userData?.email,
-		};
-		(function () {
-			emailjs.init({
-				publicKey: "WowjkcMQM9NGetQW7",
-			});
-		})();
+	// 	// generateCode(userData.email);
 
-		if (userData?.email && code) {
-			emailjs
-				.send("verification_service", "verification_form", params)
-				.then(
-					() => {
-						alert("Check your inbox for the verification");
-					},
-					(error) => {
-						setShowVerificationErr(true);
-					}
-				);
-		}
-	};
+	// 	const params = {
+	// 		to_name: userData?.fullname,
+	// 		message: code,
+	// 		to_email: userData?.email,
+	// 	};
+	// 	(function () {
+	// 		emailjs.init({
+	// 			publicKey: "WowjkcMQM9NGetQW7",
+	// 		});
+	// 	})();
 
-	const compareCode = async (codeInput: string) => {
-		const hashedCode = getStorageItem("s", null);
+	// 	if (userData?.email && code) {
+	// 		try {
+	// 			emailjs
+	// 				.send("verification_service", "verification_form", params)
+	// 				.then(
+	// 					() => {
+	// 						localStorage.setItem("s", JSON.stringify(hashed));
+	// 					},
+	// 					(error) => {
+	// 						setShowVerificationErr(true);
+	// 						if (error.message.includes("Failed to fetch")) {
+	// 							setVerificationErr({
+	// 								header: "Failed to fetch",
+	// 								description:
+	// 									"Check your internet connection and try again.",
+	// 							});
+	// 						} else {
+	// 							setVerificationErr({
+	// 								header: "Unexpected Error",
+	// 								description:
+	// 									"An unexpected error occurredd. Please try again.",
+	// 							});
+	// 						}
 
-		if (!hashedCode) {
-			alert(
-				"The verification code you entered has expired. Please request a new code and check your inbox."
-			);
-		}
+	// 						return;
+	// 					}
+	// 				);
+	// 		} catch (error) {
+	// 			setShowVerificationErr(true);
+	// 			setVerificationErr({
+	// 				header: "Unexpected Error",
+	// 				description:
+	// 					"An unexpected error occurredd. Please try again.",
+	// 			});
 
+	// 			return;
+	// 		}
+	// 	}
+	// };
+
+	// useEffect(() => {
+	// 	if (userData?.email && code) sendCode();
+	// }, [code]);
+
+	const compareCode = async (codeInput: string, id: string) => {
 		try {
-			const matches = await compare(codeInput, hashedCode);
+			const res = await Axios.get(
+				"https://record-attendance/.onrender.com/lec/compare/${id}",
+				// `http://localhost:4002/lec/compare/${id}`,
+				{ params: { code: codeInput } }
+			);
 
-			if (matches) {
-				localStorage.setItem("userData", JSON.stringify(userData));
-
+			if (res.data.ok) {
 				setShowVerificationErr(false);
 				setShowAlertPopup(true);
 
 				setTimeout(() => {
 					window.location.href = "/";
 				}, 1500);
-			} else {
-				setShowVerificationErr(true);
 			}
-		} catch (error) {}
+		} catch (error: any) {
+			setShowVerificationErr(true);
+			if (error.response.data.error.toString().includes("Invalid")) {
+				setShowVerificationErr(true);
+				setVerificationErr({
+					header: "404: Code errror",
+					description: "Invalid verification code",
+				});
+
+				return;
+			}
+
+			setVerificationErr({
+				header: "Unexpected Error",
+				description: "An unexpected error occurred",
+			});
+		}
+
 		return;
 	};
-
-	const isMounted = useRef(false);
-
-	useEffect(() => {
-		if (isMounted.current) {
-			sendCode();
-		} else {
-			isMounted.current = true; // First Render
-		}
-	}, [code]);
 
 	const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
 
 	const submit = () => {
 		const otp = inputsRef.current.map((input) => input?.value).join("");
-		compareCode(otp);
+		userData && compareCode(otp, userData.id);
 	};
 
 	return (
@@ -184,7 +232,9 @@ const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
 										}
 										style={{
 											border: `1px solid ${
-												showVerificationErr === true
+												verificationErr.description.includes(
+													"Invalid"
+												)
 													? "red"
 													: "#9e9aa5"
 											}`,
@@ -206,16 +256,20 @@ const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
 									/>
 								))}
 							</div>
-							{showVerificationErr === true && (
+							{verificationErr.description.includes(
+								"Invalid"
+							) && (
 								<p className="error">
-									Invalid code. Check your email and try
-									again.
+									{verificationErr.description}
 								</p>
 							)}
 							<div className="block">
 								<button
 									onClick={() => submit()}
 									className="actions submit width"
+									disabled={
+										showVerifyButton && code ? false : true
+									}
 								>
 									Verify
 								</button>
@@ -228,8 +282,8 @@ const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
 									to="/signup"
 									onClick={() => {
 										setPageNo(4);
-										generateCode();
-										setShowVerificationErr("clear");
+										userData &&
+											generateCode(userData.email);
 									}}
 								>
 									Resend Code
@@ -241,6 +295,7 @@ const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
 							</span>
 						</>
 					)}
+
 					{!showTextBox && (
 						<>
 							<button
@@ -252,7 +307,7 @@ const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
 							<button
 								className="actions submit"
 								onClick={() => {
-									generateCode();
+									userData && generateCode(userData.email);
 									setShowTextBox(true);
 								}}
 							>
@@ -266,9 +321,13 @@ const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
 			{showAlertPopup && (
 				<SuccessAlert setShowAlertPopup={setShowAlertPopup} />
 			)}
+			{showVerificationErr && (
+				<ErrorAlert
+					error={verificationErr}
+					setShowErrorMessage={setShowVerificationErr}
+				/>
+			)}
 		</>
-
-		// </div>
 	);
 };
 

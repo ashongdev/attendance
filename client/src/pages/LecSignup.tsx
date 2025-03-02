@@ -102,6 +102,12 @@ const LecSignup = () => {
 		}
 	}, [pageNo]);
 
+	useEffect(() => {
+		localStorage.removeItem("s");
+		localStorage.removeItem("filterGroupID");
+		localStorage.removeItem("page");
+	}, [pageNo]);
+
 	return (
 		<div className="signin-cont">
 			<form onSubmit={handleSubmit(submitHandler)}>

@@ -175,7 +175,7 @@ const Attendance: FC<Props> = ({ changePage }) => {
 					<select
 						name="group"
 						id="group"
-						value={filterGroupID}
+						value={filterGroupID ? filterGroupID : ""}
 						onChange={(e) =>
 							setFilterGroupID(e.target.value as GroupID)
 						}

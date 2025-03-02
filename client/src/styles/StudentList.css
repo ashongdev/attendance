@@ -133,6 +133,12 @@ input::placeholder {
 	transition: all 0.15s ease;
 	margin-right: 1rem;
 }
+.actions:disabled {
+	opacity: 0.5;
+}
+.actions:disabled:hover {
+	opacity: 0.5;
+}
 .submit {
 	background-color: #00959c;
 }

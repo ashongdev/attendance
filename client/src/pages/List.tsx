@@ -52,7 +52,10 @@ const List: FC<Props> = ({ changePage }) => {
 				setStudentsList,
 				setShowErrorMessage,
 				setError,
-				userData.group1
+				userData.group1,
+				userData.group2,
+				userData.group3,
+				userData.group4
 			);
 	}, []);
 
