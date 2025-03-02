@@ -1,7 +1,9 @@
-import bcrypt, { genSalt } from "bcrypt";
+import bcrypt, { compare, genSalt, hash } from "bcrypt";
 import { Request, Response } from "express";
+import nodemailer from "nodemailer";
 import { v4 as uuid } from "uuid";
 import { pool } from "../db";
+import { HTML } from "../exports/exports";
 
 const handleErrors = async (errors: any) => {
 	let errMsg;
@@ -78,18 +80,19 @@ const getStudentsAttendanceList = async (
 		res.json(error);
 	}
 };
-const getStudentsList = async (req: Request, res: Response): Promise<void> => {
-	const { groupid } = req.params;
 
-	if (!groupid) {
+const getStudentsList = async (req: Request, res: Response): Promise<void> => {
+	const { group1, group2, group3, group4 } = req.query;
+
+	if (!group1 && !group2 && !group3 && !group4) {
 		res.status(404).json({ message: "Group ID is required" });
 		return;
 	}
 
 	try {
 		const response = await pool.query(
-			"SELECT FULLNAME, EMAIL, GROUPID, INDEX_NUMBER FROM STUDENTS WHERE GROUPID = $1 ORDER BY STUDENT_ID",
-			[groupid]
+			"SELECT FULLNAME, EMAIL, GROUPID, INDEX_NUMBER FROM STUDENTS WHERE GROUPID IN($1, $2, $3, $4) ORDER BY GROUPID, STUDENT_ID",
+			[group1, group2, group3, group4]
 		);
 
 		res.json(response.rows);
@@ -173,7 +176,7 @@ const signup = async (req: Request, res: Response) => {
 	try {
 		const salt = await genSalt(10);
 		const hashedPassword = await bcrypt.hash(password, salt);
-		const sql = await pool.query(
+		await pool.query(
 			`INSERT INTO LECTURERS (LECTURER_ID, NAME, EMAIL, PHONE, FACULTY, PASSWORD,USERNAME, NO_OF_GROUPS) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
 			[
 				id,
@@ -191,10 +194,37 @@ const signup = async (req: Request, res: Response) => {
 		res.status(403).json(error);
 	}
 };
+const transporter = nodemailer.createTransport({
+	host: "smtp.gmail.com",
+	port: 465,
+	secure: true,
+	auth: {
+		user: process.env.APP_EMAIL,
+		pass: process.env.APP_PASSWORD,
+	},
+});
 
-const generateCode = async (req: Request, res: Response): Promise<void> => {
+const generateCode = async (req: any, res: Response): Promise<void> => {
 	let arrNum: number[] = [];
+
+	const userData = req.query;
+	const {
+		fullname,
+		email,
+		password,
+		group1,
+		group2,
+		group3,
+		group4,
+		no_of_groups,
+		faculty,
+		username,
+		id,
+		phone,
+	} = userData;
 	try {
+		const saltRounds = await genSalt(10);
+		const hashedPassword = await hash(password, saltRounds);
 		arrNum = [];
 
 		for (let i = 0; i < 6; i++) {
@@ -202,9 +232,102 @@ const generateCode = async (req: Request, res: Response): Promise<void> => {
 			arrNum.push(randomNum);
 		}
 		const code = arrNum.join("");
-		res.status(200).json(code);
+
+		if (!email || !code || !fullname) {
+			console.log(email, code, fullname);
+			res.status(400).json({ error: "An Unexpected error occurred!" });
+			return;
+		}
+
+		if (email && fullname && code) {
+			const saltRounds = await genSalt(10);
+			const hashedCode = await hash(code, saltRounds);
+
+			const sql = await pool.query(
+				`SELECT * FROM LECTURERS WHERE LECTURER_ID = $1`,
+				[id]
+			);
+
+			transporter
+				.sendMail({
+					to: email,
+					from: "Record Attendance",
+					html: HTML(code, fullname),
+					subject: "Verify Your Account – Action Required",
+				})
+				.then(async () => {
+					if (sql.rows.length < 1) {
+						await pool.query(
+							`INSERT INTO LECTURERS(LECTURER_ID, NAME, EMAIL, PHONE, FACULTY, PASSWORD, USERNAME, NO_OF_GROUPS, GROUP1, GROUP2, GROUP3, GROUP4) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+							[
+								id,
+								fullname,
+								email,
+								phone,
+								faculty,
+								hashedPassword,
+								username,
+								no_of_groups,
+								group1,
+								group2,
+								group3,
+								group4,
+							]
+						);
+						await pool.query(
+							`INSERT INTO AUTHCODE(LECTURER_ID, CODE) VALUES($1, $2)`,
+							[id, hashedCode]
+						);
+					} else {
+						await pool.query(`UPDATE AUTHCODE SET CODE = $1`, [
+							hashedCode,
+						]);
+					}
+					res.status(200).json({ ok: true });
+				})
+				.catch((error) => {
+					console.log(error);
+					res.status(400).json({ ok: false });
+				});
+		}
 	} catch (error) {
-		res.json(error);
+		res.status(403).json(error);
+	}
+};
+
+const compareCode = async (req: any, res: Response) => {
+	const { id: lecturerId } = req.params;
+	const { code } = req.query;
+
+	try {
+		const sql = await pool.query(
+			`SELECT CODE FROM AUTHCODE AS AC 
+			JOIN LECTURERS AS LC ON AC.LECTURER_ID = LC.LECTURER_ID 
+			WHERE CODE IS NOT NULL`
+		);
+		if (sql.rows.length === 1) {
+			const hashedCode = sql.rows[0].code;
+
+			const codeMatches = await compare(code, hashedCode);
+
+			if (codeMatches) {
+				await pool.query(
+					`UPDATE LECTURERS SET IS_VERIFIED = TRUE WHERE LECTURER_ID = $1`,
+					[lecturerId]
+				);
+
+				res.status(200).json({ ok: true });
+			} else {
+				res.status(403).json({ error: "Invalid verification code" });
+			}
+		} else {
+			res.status(403).json({
+				error: "Invalid or expired verification code",
+			});
+		}
+	} catch (error) {
+		console.log("🚀 ~ compareCode ~ error:", error);
+		res.status(403).json({ error: "An unexpected error occurred" });
 	}
 };
 
@@ -252,6 +375,7 @@ const authenticate = async (req: Request, res: Response): Promise<void> => {};
 export {
 	addStudent,
 	authenticate,
+	compareCode,
 	editStudentInfo,
 	generateCode,
 	getStudentsAttendanceList,

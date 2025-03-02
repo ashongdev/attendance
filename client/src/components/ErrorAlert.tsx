@@ -1,4 +1,4 @@
-import { Dispatch, FC, SetStateAction } from "react";
+import { Dispatch, FC, SetStateAction, useEffect, useRef } from "react";
 
 type ErrorAlertType = {
 	header: string;
@@ -10,6 +10,17 @@ interface Props {
 	setShowErrorMessage: Dispatch<SetStateAction<boolean>>;
 }
 const ErrorAlert: FC<Props> = ({ error, setShowErrorMessage }) => {
+	const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+	useEffect(() => {
+		if (timerRef.current) {
+			clearTimeout(timerRef.current);
+		}
+
+		timerRef.current = setTimeout(() => {
+			setShowErrorMessage(false);
+		}, 2000);
+	}, [error]);
 	return (
 		<div className="alert-container">
 			<div className="alert-content">

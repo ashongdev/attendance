@@ -28,6 +28,9 @@ interface ContextType {
 	page: Page;
 	setPage: Dispatch<SetStateAction<Page>>;
 	changePage: (val: Page) => void;
+	minutes: number;
+	seconds: number;
+	setTimeLeft: Dispatch<SetStateAction<number>>;
 }
 
 const ContextProvider = createContext<ContextType | undefined>(undefined);

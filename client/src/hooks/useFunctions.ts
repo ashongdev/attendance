@@ -83,13 +83,17 @@ const useFunctions = () => {
 		errorSetter: Dispatch<
 			SetStateAction<{ header: string; description: string }>
 		>,
-		groupid: GroupID | undefined
+		group1: GroupID | undefined,
+		group2: GroupID | undefined,
+		group3: GroupID | undefined,
+		group4: GroupID | undefined
 	) => {
-		if (!groupid) return;
-
 		try {
 			const res = await Axios.get(
-				`https://record-attendance.onrender.com/lec/students/${groupid}`
+				`https://record-attendance.onrender.com/lec/students/groups`,
+				{ params: { group1, group2, group3, group4 } }
+				// `http://localhost:4002/lec/students/groups`,
+				// { params: { group1, group2, group3, group4 } }
 			);
 
 			if (!res.data) {

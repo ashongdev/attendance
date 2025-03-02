@@ -87,7 +87,7 @@ const Form: FC<Props> = ({
 		}
 	};
 
-	const timerRef = useRef<number>(0);
+	const timerRef = useRef<NodeJS.Timeout | null>(null);
 	const filterGroupID = getStorageItem("filterGroupID", null);
 	return (
 		<div className="modal">
@@ -183,7 +183,7 @@ const Form: FC<Props> = ({
 							}
 							timerRef.current = setTimeout(() => {
 								setMode("");
-							}, 2000) as unknown as number;
+							}, 2000);
 							setOpenModal(false);
 						}}
 					>

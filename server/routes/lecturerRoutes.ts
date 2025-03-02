@@ -3,6 +3,7 @@ import RateLimit from "express-rate-limit";
 import {
 	addStudent,
 	authenticate,
+	compareCode,
 	editStudentInfo,
 	generateCode,
 	getStudentsAttendanceList,
@@ -24,9 +25,10 @@ const limiter = RateLimit({
 router.use(limiter);
 
 router.get("/lec/auth/:key", authenticate);
-router.get("/lec/students/:groupid", getStudentsList);
+router.get("/lec/students/:groups", getStudentsList);
 router.get("/lec/students/attendance/:groupid", getStudentsAttendanceList);
-router.get("/lec/verify", generateCode);
+router.get("/lec/verify/:userEmail", generateCode);
+router.get("/lec/compare/:id", compareCode);
 
 router.post("/lec/add-student", addStudent);
 router.post("/lec/signup", signup);

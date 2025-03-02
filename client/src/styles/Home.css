@@ -18,7 +18,7 @@ main {
 }
 .alert-container {
 	position: absolute;
-	top: 1rem;
+	top: -6rem;
 	right: 0;
 	left: 0;
 	width: 100%;
@@ -44,6 +44,10 @@ main {
 
 .alert-content button :hover {
 	background-color: #292828;
+}
+.alert-title {
+	font-weight: bold;
+	font-size: 1.3rem;
 }
 .alert-title,
 .alert-description {
