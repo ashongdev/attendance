@@ -41,7 +41,9 @@ const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
 
 	const generateCode = async () => {
 		try {
-			const res = await Axios.get("http://localhost:4002/lec/verify");
+			const res = await Axios.get(
+				"https://record-attendance.onrender.com/lec/verify"
+			);
 			if (!res.data) return alert("An unexpected error occurred!");
 
 			setCode(res.data);

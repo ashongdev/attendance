@@ -45,7 +45,7 @@ const Attendance: FC<Props> = ({ changePage }) => {
 					groupid: studentDetails.groupid,
 				};
 				const updatedList = await Axios.put(
-					"http://localhost:4002/lec/tick_attendance",
+					"https://record-attendance.onrender.com/lec/tick_attendance",
 					body
 				);
 

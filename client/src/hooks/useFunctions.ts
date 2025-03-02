@@ -58,7 +58,7 @@ const useFunctions = () => {
 
 			if (!student) return alert("No data provided for this operation.");
 			const res = await Axios.patch(
-				"http://localhost:4002/lec/edit",
+				"https://record-attendance.onrender.com/lec/edit",
 				data
 			);
 
@@ -89,7 +89,7 @@ const useFunctions = () => {
 
 		try {
 			const res = await Axios.get(
-				`http://localhost:4002/lec/students/${groupid}`
+				`https://record-attendance.onrender.com/lec/students/${groupid}`
 			);
 
 			if (!res.data) {
@@ -125,7 +125,7 @@ const useFunctions = () => {
 
 		try {
 			const res = await Axios.get(
-				`http://localhost:4002/lec/students/attendance/${groupid}`
+				`https://record-attendance.onrender.com/lec/students/attendance/${groupid}`
 			);
 
 			if (!res.data) {
@@ -162,7 +162,7 @@ const useFunctions = () => {
 	) => {
 		try {
 			const res = await Axios.post(
-				"http://localhost:4002/lec/add-student",
+				"https://record-attendance.onrender.com/lec/add-student",
 				data
 			);
 
@@ -239,7 +239,7 @@ const useFunctions = () => {
 	) => {
 		try {
 			const res = await Axios.delete(
-				`http://localhost:4002/lec/rem-student/${index_number}`,
+				`https://record-attendance.onrender.com/lec/rem-student/${index_number}`,
 				{ params: { groupid } }
 			);
 
