@@ -284,9 +284,10 @@ const generateCode = async (req: any, res: Response): Promise<void> => {
 							[id, hashedCode]
 						);
 					} else {
-						await pool.query(`UPDATE AUTHCODE SET CODE = $1`, [
-							hashedCode,
-						]);
+						await pool.query(
+							`UPDATE AUTHCODE SET CODE = $1 WHERE LECTURER_ID = $2`,
+							[hashedCode, id]
+						);
 					}
 					res.status(200).json({ ok: true });
 				})
@@ -322,6 +323,7 @@ const compareCode = async (req: any, res: Response) => {
 					[lecturerId]
 				);
 
+				console.log("DONE");
 				res.status(200).json({ ok: true });
 			} else {
 				console.log({ error: "Invalid verification code" });
