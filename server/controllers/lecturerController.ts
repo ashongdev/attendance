@@ -50,6 +50,7 @@ const editStudentInfo = async (req: Request, res: Response) => {
 		);
 		res.json(response.rows);
 	} catch (error) {
+		console.log(error);
 		res.status(402).json(error);
 	}
 };
@@ -134,6 +135,7 @@ const addStudent = async (req: Request, res: Response): Promise<void> => {
 		res.json(response.rows);
 	} catch (err) {
 		const errors = await handleErrors(err);
+		console.log("🚀 ~ addStudent ~ errors:", err);
 		res.status(403).json(errors);
 	}
 };
@@ -144,6 +146,8 @@ const removeStudent = async (req: Request, res: Response) => {
 	const trimmedGroupID = groupid?.toString().trim();
 
 	if (!id) {
+		console.log("NO ID PROVIDED");
+
 		res.status(404).json({ msg: "An unexpected error occurred." });
 	}
 
@@ -190,6 +194,7 @@ const signup = async (req: Request, res: Response) => {
 			]
 		);
 	} catch (err) {
+		console.log("🚀 ~ signup ~ err:", err);
 		const error = await handleErrors(err);
 		res.status(403).json(error);
 	}
@@ -234,7 +239,7 @@ const generateCode = async (req: any, res: Response): Promise<void> => {
 		const code = arrNum.join("");
 
 		if (!email || !code || !fullname) {
-			console.log(email, code, fullname);
+			console.log("An Unexpected error occurred!");
 			res.status(400).json({ error: "An Unexpected error occurred!" });
 			return;
 		}
@@ -291,6 +296,7 @@ const generateCode = async (req: any, res: Response): Promise<void> => {
 				});
 		}
 	} catch (error) {
+		console.log("🚀 ~ generateCode ~ error:", error);
 		res.status(403).json(error);
 	}
 };
@@ -318,9 +324,11 @@ const compareCode = async (req: any, res: Response) => {
 
 				res.status(200).json({ ok: true });
 			} else {
+				console.log({ error: "Invalid verification code" });
 				res.status(403).json({ error: "Invalid verification code" });
 			}
 		} else {
+			console.log({ error: "Invalid or expired verification code" });
 			res.status(403).json({
 				error: "Invalid or expired verification code",
 			});
@@ -332,8 +340,11 @@ const compareCode = async (req: any, res: Response) => {
 };
 
 const tickAttendance = async (req: Request, res: Response): Promise<void> => {
-	if (!req.body)
+	if (!req.body) {
+		console.log({ error: "No data provided for this operation" });
+
 		res.status(403).json({ error: "No data provided for this operation" });
+	}
 
 	const { present_status, index_number, groupid } = req.body;
 
@@ -365,7 +376,7 @@ const tickAttendance = async (req: Request, res: Response): Promise<void> => {
 		res.status(201).json(response.rows);
 	} catch (err: any) {
 		const error = await handleErrors(err);
-		console.log("🚀 ~ tickAttendance ~ error:", err.message);
+		console.log("🚀 ~ tickAttendance ~ error:", err);
 		res.status(400).json(error);
 	}
 };

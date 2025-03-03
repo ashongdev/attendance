@@ -17,6 +17,9 @@ const Context = ({ children }: { children: ReactNode }) => {
 	const [studentsList, setStudentsList] = useState<Student[]>([]);
 
 	const role: "Admin" | "Lecturer" | "Student" = getStorageItem("role", null);
+	const [timeLeft, setTimeLeft] = useState(0 * 60); // 5 minutes in seconds
+	const minutes = Math.floor(timeLeft / 60);
+	const seconds = timeLeft % 60;
 
 	const [mode, setMode] = useState<Mode>("");
 	const [userData, setUserData] = useState<Omit<
@@ -85,6 +88,9 @@ const Context = ({ children }: { children: ReactNode }) => {
 				page,
 				setPage,
 				changePage,
+				setTimeLeft,
+				minutes,
+				seconds,
 			}}
 		>
 			{children}
