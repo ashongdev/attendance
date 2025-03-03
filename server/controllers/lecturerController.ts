@@ -1,9 +1,8 @@
-import bcrypt, { compare, genSalt, hash } from "bcrypt";
+import bcrypt, { genSalt, hash } from "bcrypt";
 import { Request, Response } from "express";
 import nodemailer from "nodemailer";
 import { v4 as uuid } from "uuid";
 import { pool } from "../db";
-import { HTML } from "../exports/exports";
 
 const handleErrors = async (errors: any) => {
 	let errMsg;
