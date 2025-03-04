@@ -1,9 +1,113 @@
+const brevo = require("@getbrevo/brevo");
 import bcrypt, { compare, genSalt, hash } from "bcrypt";
 import { Request, Response } from "express";
-import nodemailer from "nodemailer";
 import { v4 as uuid } from "uuid";
 import { pool } from "../db";
 import { HTML } from "../exports/exports";
+
+let apiInstance = new brevo.TransactionalEmailsApi();
+apiInstance.apiClient.authentications["api-key"].apiKey =
+	process.env.BREVO_API_KEY;
+
+const generateCode = async (req: any, res: Response): Promise<void> => {
+	let arrNum: number[] = [];
+
+	const userData = req.query;
+	const {
+		fullname,
+		email: userEmail,
+		password,
+		group1,
+		group2,
+		group3,
+		group4,
+		no_of_groups,
+		faculty,
+		username,
+		id,
+		phone,
+	} = userData;
+	try {
+		const saltRounds = await genSalt(10);
+		const hashedPassword = await hash(password, saltRounds);
+		arrNum = [];
+
+		for (let i = 0; i < 6; i++) {
+			const randomNum = Math.floor(Math.random() * 9);
+			arrNum.push(randomNum);
+		}
+		const code = arrNum.join("");
+
+		if (!userEmail || !code || !username) {
+			console.log("An Unexpected error occurred!");
+			res.status(400).json({ error: "An Unexpected error occurred!" });
+			return;
+		}
+
+		if (userEmail && username && code) {
+			const saltRounds = await genSalt(10);
+			const hashedCode = await hash(code, saltRounds);
+
+			let sendSmtpEmail = new brevo.SendSmtpEmail();
+
+			sendSmtpEmail = {
+				subject: "Verify Your Account – Action Required",
+				sender: {
+					name: "ClassTrack",
+					email: "recordattendance3@gmail.com",
+				},
+				to: [{ email: userEmail }],
+				htmlContent: HTML(code, username),
+			};
+
+			apiInstance
+				.sendTransacEmail(sendSmtpEmail)
+				.then(async () => {
+					const sql = await pool.query(
+						`SELECT * FROM LECTURERS WHERE LECTURER_ID = $1`,
+						[id]
+					);
+
+					if (sql.rows.length < 1) {
+						await pool.query(
+							`INSERT INTO LECTURERS(LECTURER_ID, NAME, EMAIL, PHONE, FACULTY, PASSWORD, USERNAME, NO_OF_GROUPS, GROUP1, GROUP2, GROUP3, GROUP4) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+							[
+								id,
+								fullname,
+								userEmail,
+								phone,
+								faculty,
+								hashedPassword,
+								username,
+								no_of_groups,
+								group1,
+								group2,
+								group3,
+								group4,
+							]
+						);
+						await pool.query(
+							`INSERT INTO AUTHCODE(LECTURER_ID, CODE) VALUES($1, $2)`,
+							[id, hashedCode]
+						);
+					} else {
+						await pool.query(
+							`UPDATE AUTHCODE SET CODE = $1 WHERE LECTURER_ID = $2`,
+							[hashedCode, id]
+						);
+					}
+					res.status(200).json({ ok: true });
+				})
+				.catch((error: any) => {
+					console.log(error);
+					res.status(400).json({ ok: false });
+				});
+		}
+	} catch (error: any) {
+		console.log("🚀 ~ generateCode ~ error:", error.message);
+		res.status(403).json(error);
+	}
+};
 
 const handleErrors = async (errors: any) => {
 	let errMsg;
@@ -196,108 +300,6 @@ const signup = async (req: Request, res: Response) => {
 	} catch (err) {
 		console.log("🚀 ~ signup ~ err:", err);
 		const error = await handleErrors(err);
-		res.status(403).json(error);
-	}
-};
-const transporter = nodemailer.createTransport({
-	host: "smtp.gmail.com",
-	port: 465,
-	secure: true,
-	auth: {
-		user: process.env.APP_EMAIL,
-		pass: process.env.APP_PASSWORD,
-	},
-});
-
-const generateCode = async (req: any, res: Response): Promise<void> => {
-	let arrNum: number[] = [];
-
-	const userData = req.query;
-	const {
-		fullname,
-		email,
-		password,
-		group1,
-		group2,
-		group3,
-		group4,
-		no_of_groups,
-		faculty,
-		username,
-		id,
-		phone,
-	} = userData;
-	try {
-		const saltRounds = await genSalt(10);
-		const hashedPassword = await hash(password, saltRounds);
-		arrNum = [];
-
-		for (let i = 0; i < 6; i++) {
-			const randomNum = Math.floor(Math.random() * 9);
-			arrNum.push(randomNum);
-		}
-		const code = arrNum.join("");
-
-		if (!email || !code || !fullname) {
-			console.log("An Unexpected error occurred!");
-			res.status(400).json({ error: "An Unexpected error occurred!" });
-			return;
-		}
-
-		if (email && fullname && code) {
-			const saltRounds = await genSalt(10);
-			const hashedCode = await hash(code, saltRounds);
-
-			const sql = await pool.query(
-				`SELECT * FROM LECTURERS WHERE LECTURER_ID = $1`,
-				[id]
-			);
-
-			transporter
-				.sendMail({
-					to: email,
-					from: "Record Attendance",
-					html: HTML(code, fullname),
-					subject: "Verify Your Account – Action Required",
-				})
-				.then(async () => {
-					if (sql.rows.length < 1) {
-						await pool.query(
-							`INSERT INTO LECTURERS(LECTURER_ID, NAME, EMAIL, PHONE, FACULTY, PASSWORD, USERNAME, NO_OF_GROUPS, GROUP1, GROUP2, GROUP3, GROUP4) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
-							[
-								id,
-								fullname,
-								email,
-								phone,
-								faculty,
-								hashedPassword,
-								username,
-								no_of_groups,
-								group1,
-								group2,
-								group3,
-								group4,
-							]
-						);
-						await pool.query(
-							`INSERT INTO AUTHCODE(LECTURER_ID, CODE) VALUES($1, $2)`,
-							[id, hashedCode]
-						);
-					} else {
-						await pool.query(
-							`UPDATE AUTHCODE SET CODE = $1 WHERE LECTURER_ID = $2`,
-							[hashedCode, id]
-						);
-					}
-					res.status(200).json({ ok: true });
-				})
-				.catch((error) => {
-					console.log(error);
-					res.status(400).json({ ok: false });
-				});
-		}
-	} catch (error) {
-		console.log("🚀 ~ generateCode ~ error:", error);
 		res.status(403).json(error);
 	}
 };

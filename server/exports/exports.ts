@@ -2,7 +2,7 @@ export type CorsCallback = (error: Error | null, success: boolean) => void;
 
 export interface Entity {
 	id: string;
-	fullname: string;
+	username: string;
 	index_number: string;
 	groupid: string;
 	coursecode: string;
@@ -14,7 +14,7 @@ export interface LecturerType extends Omit<Entity, "index_number"> {
 	coursename: string;
 }
 
-export const HTML = (code: string, fullname: any) => {
+export const HTML = (code: string, username: any) => {
 	return `<div
 	style="
 		max-width: 600px;
@@ -41,7 +41,7 @@ export const HTML = (code: string, fullname: any) => {
 				letter-spacing: 1px;
 			"
 		>
-			Hello ${fullname}
+			Hello ${username}
 		</h1>
 		<p
 			style="
