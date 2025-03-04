@@ -48,7 +48,7 @@ const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
 	const generateCode = async (userEmail: string) => {
 		try {
 			const res = await Axios.get(
-				`https://record-attendance/.onrender.com/lec/verify/${userEmail}`,
+				`https://record-attendance.onrender.com/lec/verify/${userEmail}`,
 				// `http://localhost:4002/lec/verify/${userEmail}`,
 				{ params: userData }
 			);
@@ -161,7 +161,7 @@ const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
 	const compareCode = async (codeInput: string, id: string) => {
 		try {
 			const res = await Axios.get(
-				`https://record-attendance/.onrender.com/lec/compare/${id}`,
+				`https://record-attendance.onrender.com/lec/compare/${id}`,
 				// `http://localhost:4002/lec/compare/${id}`,
 				{ params: { code: codeInput } }
 			);
