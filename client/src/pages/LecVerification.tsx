@@ -184,6 +184,7 @@ const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
 				authenticateLecturer(id);
 			}
 		} catch (error: any) {
+			console.log("🚀 ~ compareCode ~ error:", error);
 			setShowVerificationErr(true);
 			if (error.response.data.error.toString().includes("Invalid")) {
 				setShowVerificationErr(true);
