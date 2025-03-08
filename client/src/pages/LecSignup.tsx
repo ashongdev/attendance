@@ -11,7 +11,7 @@ const LecSignup = () => {
 	const { setUserData } = useContextProvider();
 
 	const Schema = yup.object().shape({
-		id: yup
+		lecturer_id: yup
 			.string()
 			.required("ID is required")
 			.matches(/^[0-9]{10}$/, "ID must be exactly 10 digits"),
@@ -76,7 +76,7 @@ const LecSignup = () => {
 
 	const submitHandler = async (data: Omit<Lecturer, "confirmPassword">) => {
 		if (!data) {
-			alert("No data provided for this provided.");
+			alert("No data provided for this operation.");
 			return;
 		}
 
@@ -85,7 +85,12 @@ const LecSignup = () => {
 	};
 
 	useEffect(() => {
-		if (!errors.fullname && !errors.phone && !errors.id && !errors.username)
+		if (
+			!errors.fullname &&
+			!errors.phone &&
+			!errors.lecturer_id &&
+			!errors.username
+		)
 			if (errors.faculty && errors.no_of_groups) {
 				setPageNo(2);
 			}
@@ -100,12 +105,6 @@ const LecSignup = () => {
 				setShowNextPage(true);
 			}, 120);
 		}
-	}, [pageNo]);
-
-	useEffect(() => {
-		localStorage.removeItem("s");
-		localStorage.removeItem("filterGroupID");
-		localStorage.removeItem("page");
 	}, [pageNo]);
 
 	return (
@@ -138,7 +137,7 @@ const LecSignup = () => {
 								type="text"
 								maxLength={10}
 								placeholder="e.g., 0028012312"
-								{...register("id")}
+								{...register("lecturer_id")}
 							/>
 						</div>
 

@@ -30,6 +30,7 @@ const List: FC<Props> = ({ changePage }) => {
 		openModal,
 		setOpenModal,
 		userData,
+		authenticateLecturer,
 	} = useContextProvider();
 
 	const [studentToBeEdited, setStudentToBeEdited] = useState<
@@ -47,16 +48,19 @@ const List: FC<Props> = ({ changePage }) => {
 	};
 
 	useEffect(() => {
-		userData &&
-			getStudentsList(
-				setStudentsList,
-				setShowErrorMessage,
-				setError,
-				userData.group1,
-				userData.group2,
-				userData.group3,
-				userData.group4
-			);
+		if (!userData) return;
+
+		authenticateLecturer(userData.lecturer_id);
+
+		getStudentsList(
+			setStudentsList,
+			setShowErrorMessage,
+			setError,
+			userData.group1,
+			userData.group2,
+			userData.group3,
+			userData.group4
+		);
 	}, []);
 
 	return (

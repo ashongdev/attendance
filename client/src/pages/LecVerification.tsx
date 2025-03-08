@@ -33,6 +33,7 @@ const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
 		seconds,
 	} = useContextProvider();
 	const { handleInput, handleKeyDown, handlePaste } = useInputFunctions();
+	const { authenticateLecturer } = useContextProvider();
 
 	const [showTextBox, setShowTextBox] = useState(false);
 	const [showVerificationErr, setShowVerificationErr] =
@@ -159,6 +160,16 @@ const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
 	// }, [code]);
 
 	const compareCode = async (codeInput: string, id: string) => {
+		if (!id) {
+			setShowVerificationErr(true);
+			setVerificationErr({
+				header: "Unexpected Error",
+				description: "Unexpected error occurred. Please try again!",
+			});
+
+			return;
+		}
+
 		try {
 			const res = await Axios.get(
 				`https://record-attendance/.onrender.com/lec/compare/${id}`,
@@ -170,9 +181,7 @@ const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
 				setShowVerificationErr(false);
 				setShowAlertPopup(true);
 
-				setTimeout(() => {
-					window.location.href = "/";
-				}, 1500);
+				authenticateLecturer(id);
 			}
 		} catch (error: any) {
 			setShowVerificationErr(true);
@@ -199,8 +208,14 @@ const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
 
 	const submit = () => {
 		const otp = inputsRef.current.map((input) => input?.value).join("");
-		userData && compareCode(otp, userData.id);
+		userData && compareCode(otp, userData.lecturer_id);
 	};
+
+	useEffect(() => {
+		localStorage.removeItem("auth");
+		localStorage.removeItem("filterGroupID");
+		localStorage.removeItem("page");
+	}, []);
 
 	return (
 		<>

@@ -7,13 +7,8 @@ import absentIcon from "../images/close-circle-outline.svg";
 import personIcon from "../images/user-regular.svg";
 
 const Dashboard = () => {
-	const {
-		studentsList,
-		setStudentsList,
-		setShowErrorMessage,
-		setError,
-		userData,
-	} = useContextProvider();
+	const { studentsList, userData, authenticateLecturer } =
+		useContextProvider();
 	const { getStudentsList } = useFunctions();
 	const [totalPresent, setTotalPresent] = useState(0);
 	const [totalAbsent, setTotalAbsent] = useState(0);
@@ -39,6 +34,9 @@ const Dashboard = () => {
 		// 	setError,
 		// 	userData.groupid
 		// );
+		if (!userData) return;
+
+		authenticateLecturer(userData.lecturer_id);
 
 		calculateTotals();
 

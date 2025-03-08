@@ -31,6 +31,7 @@ interface ContextType {
 	minutes: number;
 	seconds: number;
 	setTimeLeft: Dispatch<SetStateAction<number>>;
+	authenticateLecturer: (val: string) => void;
 }
 
 const ContextProvider = createContext<ContextType | undefined>(undefined);
@@ -59,7 +60,7 @@ type Lecturer = {
 	phone: string;
 	email: string;
 	fullname: string;
-	id: string;
+	lecturer_id: string;
 	username: string;
 };
 

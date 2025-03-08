@@ -308,24 +308,30 @@ const compareCode = async (req: any, res: Response) => {
 	const { id: lecturerId } = req.params;
 	const { code } = req.query;
 
+	if (!lecturerId || lecturerId === "undefined") {
+		res.status(403).json({ error: "An unexpected error occurred" });
+
+		return;
+	}
+
 	try {
 		const sql = await pool.query(
 			`SELECT CODE FROM AUTHCODE AS AC 
 			JOIN LECTURERS AS LC ON AC.LECTURER_ID = LC.LECTURER_ID 
-			WHERE CODE IS NOT NULL`
+			WHERE CODE IS NOT NULL AND LC.LECTURER_ID = $1`,
+			[lecturerId]
 		);
 		if (sql.rows.length === 1) {
 			const hashedCode = sql.rows[0].code;
 
 			const codeMatches = await compare(code, hashedCode);
 
-			if (codeMatches) {
+			if (codeMatches && lecturerId) {
 				await pool.query(
 					`UPDATE LECTURERS SET IS_VERIFIED = TRUE WHERE LECTURER_ID = $1`,
 					[lecturerId]
 				);
 
-				console.log("DONE");
 				res.status(200).json({ ok: true });
 			} else {
 				console.log({ error: "Invalid verification code" });
@@ -385,7 +391,30 @@ const tickAttendance = async (req: Request, res: Response): Promise<void> => {
 	}
 };
 
-const authenticate = async (req: Request, res: Response): Promise<void> => {};
+const authenticate = async (req: Request, res: Response): Promise<void> => {
+	const { id } = req.params;
+	if (!id) {
+		res.status(404).json({ error: "No ID provided" });
+
+		return;
+	}
+
+	try {
+		const sql = await pool.query(
+			`SELECT LECTURER_ID, NAME, EMAIL, FACULTY, USERNAME, NO_OF_GROUPS, GROUP1, GROUP2, GROUP3, GROUP4 FROM LECTURERS WHERE LECTURER_ID = $1 AND IS_VERIFIED = TRUE`,
+			[id]
+		);
+
+		if (sql.rows.length === 1) {
+			res.status(200).json(sql.rows[0]);
+		} else {
+			res.status(403).json({ error: "Not authorized" });
+		}
+	} catch (error) {
+		console.log("🚀 ~ authenticate ~ error:", error);
+		res.status(403).json(error);
+	}
+};
 
 export {
 	addStudent,

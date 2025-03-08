@@ -1,13 +1,14 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import {
 	createBrowserRouter,
 	Navigate,
 	RouterProvider,
+	useLocation,
 } from "react-router-dom";
 import Header from "./components/Header";
+import Loader from "./components/Loader.tsx";
 import Sidebar from "./components/Sidebar";
 import useContextProvider from "./hooks/useContextProvider.ts";
-import useFunctions from "./hooks/useFunctions.ts";
 import Attendance from "./pages/Attendance.tsx";
 import Dashboard from "./pages/Dashboard";
 import LecSignup from "./pages/LecSignup.tsx";
@@ -27,51 +28,80 @@ const RenderSideBar = ({ children }: { children: ReactNode }) => {
 	return (
 		<main style={{ marginLeft: showSideBar ? "15rem" : "0rem" }}>
 			<Header setShowSideBar={setShowSideBar} />
-			{showSideBar && <Sidebar changePage={changePage} page={page} />}
+			{showSideBar && (
+				<Sidebar
+					changePage={changePage}
+					setShowSideBar={setShowSideBar}
+					page={page}
+				/>
+			)}
 			{children}
 		</main>
 	);
 };
-const App = () => {
-	const { getStorageItem } = useFunctions();
-	const { changePage } = useContextProvider();
 
-	const userData = getStorageItem("userData", null);
+const Loading = ({ children }: { children: ReactNode }) => {
+	const location = useLocation();
+	const [isRendered, setIsRendered] = useState(false);
+
+	useEffect(() => {
+		setIsRendered(false);
+
+		const timer = setTimeout(() => {
+			setIsRendered(true);
+		}, 2000);
+
+		return () => clearTimeout(timer);
+	}, [location.pathname]);
+
+	return isRendered ? <>{children}</> : <Loader />;
+};
+
+const App = () => {
+	const { changePage, userData } = useContextProvider();
 
 	const router = createBrowserRouter(
 		[
 			{
 				path: "/",
-				element: userData ? (
+				element: (
 					<RenderSideBar>
-						<Dashboard />
+						{!userData ? (
+							<Navigate to="/signup" />
+						) : (
+							<Loading>
+								<Dashboard />
+							</Loading>
+						)}
 					</RenderSideBar>
-				) : (
-					<Navigate to="/signup" />
 				),
 			},
 			{
 				path: "/list",
-				element: userData ? (
-					<>
-						<RenderSideBar>
-							<List changePage={changePage} />
-						</RenderSideBar>
-					</>
-				) : (
-					<Navigate to="/signup" />
+				element: (
+					<RenderSideBar>
+						{!userData ? (
+							<Navigate to="/signup" />
+						) : (
+							<Loading>
+								<List changePage={changePage} />
+							</Loading>
+						)}
+					</RenderSideBar>
 				),
 			},
 			{
 				path: "/attendance",
-				element: userData ? (
-					<>
-						<RenderSideBar>
-							<Attendance changePage={changePage} />
-						</RenderSideBar>
-					</>
-				) : (
-					<Navigate to="/signup" />
+				element: (
+					<RenderSideBar>
+						{!userData ? (
+							<Navigate to="/signup" />
+						) : (
+							<Loading>
+								<Attendance changePage={changePage} />
+							</Loading>
+						)}
+					</RenderSideBar>
 				),
 			},
 			{
@@ -79,7 +109,13 @@ const App = () => {
 				element: !userData ? (
 					<>
 						<RenderSideBar>
-							<LecSignup />
+							{userData ? (
+								<Navigate to="/" />
+							) : (
+								<Loading>
+									<LecSignup />
+								</Loading>
+							)}
 						</RenderSideBar>
 					</>
 				) : (

@@ -13,8 +13,14 @@ interface Props {
 
 const Attendance: FC<Props> = ({ changePage }) => {
 	const { getStudentsAttendanceList, getStorageItem } = useFunctions();
-	const { setShowErrorMessage, showErrorMessage, setError, error, userData } =
-		useContextProvider();
+	const {
+		setShowErrorMessage,
+		showErrorMessage,
+		setError,
+		error,
+		userData,
+		authenticateLecturer,
+	} = useContextProvider();
 
 	const [filterGroupID, setFilterGroupID] = useState<GroupID | undefined>(
 		getStorageItem("filterGroupID", null)
@@ -73,8 +79,7 @@ const Attendance: FC<Props> = ({ changePage }) => {
 					userData.group3 === "" ||
 					userData.group4 === "")
 			) {
-				localStorage.removeItem("s");
-				localStorage.removeItem("userData");
+				localStorage.removeItem("auth");
 				navigateTo = "/signup";
 			}
 
@@ -91,7 +96,10 @@ const Attendance: FC<Props> = ({ changePage }) => {
 	}, [filterGroupID]);
 
 	useEffect(() => {
-		userData && setFilterGroupID(userData?.group1);
+		if (!userData) return;
+
+		userData && authenticateLecturer(userData.lecturer_id);
+		setFilterGroupID(userData?.group1);
 	}, []);
 
 	const renderStudentRow = (student: Student, index: number) => (

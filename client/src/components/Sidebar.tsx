@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { Dispatch, FC, SetStateAction } from "react";
 import { Link } from "react-router-dom";
 import { Page } from "../exports/exports";
 import useContextProvider from "../hooks/useContextProvider";
@@ -11,8 +11,9 @@ import personIcon from "../images/user-regular.svg";
 export interface Props {
 	page: Page;
 	changePage: (val: Page) => void;
+	setShowSideBar: Dispatch<SetStateAction<boolean>>;
 }
-const Sidebar: FC<Props> = ({ page, changePage }) => {
+const Sidebar: FC<Props> = ({ page, changePage, setShowSideBar }) => {
 	const { userData } = useContextProvider();
 
 	return (
@@ -27,7 +28,10 @@ const Sidebar: FC<Props> = ({ page, changePage }) => {
 						<Link
 							className={page === "Home" ? "current-link" : ""}
 							to="/"
-							onClick={() => changePage("Home")}
+							onClick={() => {
+								changePage("Home");
+								setShowSideBar(false);
+							}}
 						>
 							<img src={dashboardIcon} alt="" />
 							<span>Dashboard</span>
@@ -36,7 +40,10 @@ const Sidebar: FC<Props> = ({ page, changePage }) => {
 						<Link
 							className={page === "List" ? "current-link" : ""}
 							to="/list"
-							onClick={() => changePage("List")}
+							onClick={() => {
+								changePage("List");
+								setShowSideBar(false);
+							}}
 						>
 							<img src={studentsIcon} alt="" />
 							<span>Students</span>
@@ -51,7 +58,10 @@ const Sidebar: FC<Props> = ({ page, changePage }) => {
 								page === "Attendance" ? "current-link" : ""
 							}
 							to="/attendance"
-							onClick={() => changePage("Attendance")}
+							onClick={() => {
+								changePage("Attendance");
+								setShowSideBar(false);
+							}}
 						>
 							<img src={attendanceSheetIcon} alt="" />
 							<span>Attendance Sheet</span>
@@ -59,7 +69,10 @@ const Sidebar: FC<Props> = ({ page, changePage }) => {
 						<Link
 							className={page === "Report" ? "current-link" : ""}
 							to="/report"
-							onClick={() => changePage("Report")}
+							onClick={() => {
+								changePage("Report");
+								setShowSideBar(false);
+							}}
 						>
 							<img src={SheetReportIcon} alt="" />
 							<span>Sheet Report</span>
@@ -72,7 +85,10 @@ const Sidebar: FC<Props> = ({ page, changePage }) => {
 						<Link
 							className={page === "Home" ? "current-link" : ""}
 							to="/signup"
-							onClick={() => changePage("Home")}
+							onClick={() => {
+								changePage("Home");
+								setShowSideBar(false);
+							}}
 						>
 							<img src={personIcon} alt="" />
 							<span>Signup</span>

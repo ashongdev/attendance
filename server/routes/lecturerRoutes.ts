@@ -24,7 +24,7 @@ const limiter = RateLimit({
 // apply rate limiter to all requests
 router.use(limiter);
 
-router.get("/lec/auth/:key", authenticate);
+router.get("/lec/auth/:id", authenticate);
 router.get("/lec/students/:groups", getStudentsList);
 router.get("/lec/students/attendance/:groupid", getStudentsAttendanceList);
 router.get("/lec/verify/:userEmail", generateCode);

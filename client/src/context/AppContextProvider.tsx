@@ -1,3 +1,4 @@
+import Axios from "axios";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import {
 	ContextProvider,
@@ -25,7 +26,7 @@ const Context = ({ children }: { children: ReactNode }) => {
 	const [userData, setUserData] = useState<Omit<
 		Lecturer,
 		"confirmPassword"
-	> | null>(getStorageItem("userData", null));
+	> | null>(getStorageItem("auth", null));
 	const [showErrorMessage, setShowErrorMessage] = useState(false);
 	const [showAlertPopup, setShowAlertPopup] = useState(false);
 	const [error, setError] = useState({
@@ -63,6 +64,38 @@ const Context = ({ children }: { children: ReactNode }) => {
 		};
 	}, [showAlertPopup, showErrorMessage]);
 
+	const authenticateLecturer = async (id: string) => {
+		if (!id) {
+			setShowErrorMessage(true);
+			setError({
+				header: "Invalid ID",
+				description: "Please provide an ID to continue",
+			});
+
+			return;
+		}
+
+		try {
+			const res = await Axios.get(
+				// `http://localhost:4002/lec/auth/${id}`
+				`https://record-attendance.onrender.com/lec/auth/${id}`
+			);
+			localStorage.setItem("auth", JSON.stringify(res.data));
+			setUserData(res.data);
+
+			return;
+		} catch (error) {
+			console.log("🚀 ~ authenticateLecturer ~ error:", error);
+			localStorage.removeItem("auth");
+			localStorage.removeItem("filterGroupID");
+			localStorage.removeItem("page");
+
+			window.location.href = "/signup";
+
+			return;
+		}
+	};
+
 	const changePage = (page: Page) => {
 		setPage(page);
 		localStorage.setItem("page", JSON.stringify(page));
@@ -91,6 +124,7 @@ const Context = ({ children }: { children: ReactNode }) => {
 				setTimeLeft,
 				minutes,
 				seconds,
+				authenticateLecturer,
 			}}
 		>
 			{children}
