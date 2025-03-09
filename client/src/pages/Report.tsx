@@ -29,7 +29,8 @@ const Report = () => {
 	const getReport = async (groupid: GroupID | null) => {
 		try {
 			const res = await Axios.get(
-				`http://localhost:4002/lec/report/${groupid}`
+				// `http://localhost:4002/lec/report/${groupid}`
+				`https://record-attendance.onrender.com/lec/report/${groupid}`
 			);
 			if (res.data) {
 				setReportData(res.data);
