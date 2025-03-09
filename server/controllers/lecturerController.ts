@@ -14,7 +14,6 @@ const generateCode = async (req: any, res: Response): Promise<void> => {
 
 	const userData = req.query;
 	const {
-		fullname,
 		email: userEmail,
 		password,
 		group1,
@@ -23,9 +22,10 @@ const generateCode = async (req: any, res: Response): Promise<void> => {
 		group4,
 		no_of_groups,
 		faculty,
-		username,
-		id,
+		fullname,
+		lecturer_id,
 		phone,
+		gender,
 	} = userData;
 	try {
 		const saltRounds = await genSalt(10);
@@ -38,13 +38,13 @@ const generateCode = async (req: any, res: Response): Promise<void> => {
 		}
 		const code = arrNum.join("");
 
-		if (!userEmail || !code || !username) {
+		if (!userEmail || !code || !fullname) {
 			console.log("An Unexpected error occurred!");
 			res.status(400).json({ error: "An Unexpected error occurred!" });
 			return;
 		}
 
-		if (userEmail && username && code) {
+		if (userEmail && fullname && code) {
 			const saltRounds = await genSalt(10);
 			const hashedCode = await hash(code, saltRounds);
 
@@ -57,7 +57,7 @@ const generateCode = async (req: any, res: Response): Promise<void> => {
 					email: "recordattendance3@gmail.com",
 				},
 				to: [{ email: userEmail }],
-				htmlContent: HTML(code, username),
+				htmlContent: HTML(code, fullname),
 			};
 
 			apiInstance
@@ -65,21 +65,22 @@ const generateCode = async (req: any, res: Response): Promise<void> => {
 				.then(async () => {
 					const sql = await pool.query(
 						`SELECT * FROM LECTURERS WHERE LECTURER_ID = $1`,
-						[id]
+						[lecturer_id]
 					);
 
 					if (sql.rows.length < 1) {
 						await pool.query(
-							`INSERT INTO LECTURERS(LECTURER_ID, NAME, EMAIL, PHONE, FACULTY, PASSWORD, USERNAME, NO_OF_GROUPS, GROUP1, GROUP2, GROUP3, GROUP4) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+							`INSERT INTO LECTURERS(LECTURER_ID, NAME, EMAIL, PHONE, FACULTY, PASSWORD, FULLNAME, NO_OF_GROUPS, GENDER, GROUP1, GROUP2, GROUP3, GROUP4) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
 							[
-								id,
+								lecturer_id,
 								fullname,
 								userEmail,
 								phone,
 								faculty,
 								hashedPassword,
-								username,
+								fullname,
 								no_of_groups,
+								gender,
 								group1,
 								group2,
 								group3,
@@ -88,12 +89,12 @@ const generateCode = async (req: any, res: Response): Promise<void> => {
 						);
 						await pool.query(
 							`INSERT INTO AUTHCODE(LECTURER_ID, CODE) VALUES($1, $2)`,
-							[id, hashedCode]
+							[lecturer_id, hashedCode]
 						);
 					} else {
 						await pool.query(
 							`UPDATE AUTHCODE SET CODE = $1 WHERE LECTURER_ID = $2`,
-							[hashedCode, id]
+							[hashedCode, lecturer_id]
 						);
 					}
 					res.status(200).json({ ok: true });
@@ -270,22 +271,14 @@ const removeStudent = async (req: Request, res: Response) => {
 };
 
 const signup = async (req: Request, res: Response) => {
-	const {
-		username,
-		id,
-		email,
-		phone,
-		fullname,
-		faculty,
-		no_of_groups,
-		password,
-	} = req.body;
+	const { id, email, phone, fullname, faculty, no_of_groups, password } =
+		req.body;
 
 	try {
 		const salt = await genSalt(10);
 		const hashedPassword = await bcrypt.hash(password, salt);
 		await pool.query(
-			`INSERT INTO LECTURERS (LECTURER_ID, NAME, EMAIL, PHONE, FACULTY, PASSWORD,USERNAME, NO_OF_GROUPS) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+			`INSERT INTO LECTURERS (LECTURER_ID, NAME, EMAIL, PHONE, FACULTY, PASSWORD,FULLNAME, NO_OF_GROUPS) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
 			[
 				id,
 				fullname,
@@ -293,7 +286,7 @@ const signup = async (req: Request, res: Response) => {
 				phone,
 				faculty,
 				hashedPassword,
-				username,
+				fullname,
 				no_of_groups,
 			]
 		);
@@ -365,6 +358,7 @@ const tickAttendance = async (req: Request, res: Response): Promise<void> => {
 		);
 
 		if (checkID.rows.length === 1) {
+			console.log("Updated");
 			await pool.query(
 				`UPDATE ATTENDANCE SET PRESENT_STATUS = $1, ATTENDANCE_DATE = $2 WHERE STUDENT_ID = $3`,
 				[present_status, new Date(), index_number]
@@ -401,7 +395,7 @@ const authenticate = async (req: Request, res: Response): Promise<void> => {
 
 	try {
 		const sql = await pool.query(
-			`SELECT LECTURER_ID, NAME, EMAIL, FACULTY, USERNAME, NO_OF_GROUPS, GROUP1, GROUP2, GROUP3, GROUP4 FROM LECTURERS WHERE LECTURER_ID = $1 AND IS_VERIFIED = TRUE`,
+			`SELECT LECTURER_ID, GENDER, NAME, EMAIL, FACULTY, FULLNAME, NO_OF_GROUPS, GROUP1, GROUP2, GROUP3, GROUP4 FROM LECTURERS WHERE LECTURER_ID = $1 AND IS_VERIFIED = TRUE`,
 			[id]
 		);
 

@@ -8,7 +8,6 @@ import {
 	useRef,
 	useState,
 } from "react";
-import { Link } from "react-router-dom";
 import ErrorAlert from "../components/ErrorAlert";
 import SuccessAlert from "../components/SuccessAlert";
 import useContextProvider from "../hooks/useContextProvider";
@@ -43,7 +42,6 @@ const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
 		header: "",
 		description: "",
 	});
-	const [code, setCode] = useState("");
 	const timerRef = useRef<NodeJS.Timeout | null>(null);
 
 	const generateCode = async (userEmail: string) => {
@@ -94,70 +92,6 @@ const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
 			localStorage.removeItem("s");
 		}
 	}, [minutes, seconds]);
-	// useEffect(() => {
-	// 	console.log(code);
-	// }, [code]);
-
-	// const sendCode = async () => {
-	// 	const salt = await genSalt(10);
-	// 	const hashed = await hash(code, salt);
-
-	// 	// generateCode(userData.email);
-
-	// 	const params = {
-	// 		to_name: userData?.fullname,
-	// 		message: code,
-	// 		to_email: userData?.email,
-	// 	};
-	// 	(function () {
-	// 		emailjs.init({
-	// 			publicKey: "WowjkcMQM9NGetQW7",
-	// 		});
-	// 	})();
-
-	// 	if (userData?.email && code) {
-	// 		try {
-	// 			emailjs
-	// 				.send("verification_service", "verification_form", params)
-	// 				.then(
-	// 					() => {
-	// 						localStorage.setItem("s", JSON.stringify(hashed));
-	// 					},
-	// 					(error) => {
-	// 						setShowVerificationErr(true);
-	// 						if (error.message.includes("Failed to fetch")) {
-	// 							setVerificationErr({
-	// 								header: "Failed to fetch",
-	// 								description:
-	// 									"Check your internet connection and try again.",
-	// 							});
-	// 						} else {
-	// 							setVerificationErr({
-	// 								header: "Unexpected Error",
-	// 								description:
-	// 									"An unexpected error occurredd. Please try again.",
-	// 							});
-	// 						}
-
-	// 						return;
-	// 					}
-	// 				);
-	// 		} catch (error) {
-	// 			setShowVerificationErr(true);
-	// 			setVerificationErr({
-	// 				header: "Unexpected Error",
-	// 				description:
-	// 					"An unexpected error occurredd. Please try again.",
-	// 			});
-
-	// 			return;
-	// 		}
-	// 	}
-	// };
-
-	// useEffect(() => {
-	// 	if (userData?.email && code) sendCode();
-	// }, [code]);
 
 	const compareCode = async (codeInput: string, id: string) => {
 		if (!id) {
@@ -283,9 +217,7 @@ const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
 								<button
 									onClick={() => submit()}
 									className="actions submit width"
-									disabled={
-										showVerifyButton && code ? false : true
-									}
+									disabled={showVerifyButton ? false : true}
 								>
 									Verify
 								</button>
@@ -294,16 +226,14 @@ const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
 								className="block"
 								style={{ textAlign: "center" }}
 							>
-								<Link
-									to="/signup"
+								<button
 									onClick={() => {
-										setPageNo(4);
 										userData &&
 											generateCode(userData.email);
 									}}
 								>
 									Resend Code
-								</Link>
+								</button>
 							</div>
 							<span>
 								The code expires in {minutes}:

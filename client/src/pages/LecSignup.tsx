@@ -16,7 +16,10 @@ const LecSignup = () => {
 			.required("ID is required")
 			.matches(/^[0-9]{10}$/, "ID must be exactly 10 digits"),
 		fullname: yup.string().required("Full name is required"),
-		username: yup.string().required("User name is required"),
+		gender: yup
+			.string()
+			.oneOf(["M", "F"], "Gender must be either Male or Female")
+			.required("This field is required."),
 		email: yup
 			.string()
 			.email("Invalid email format")
@@ -89,7 +92,7 @@ const LecSignup = () => {
 			!errors.fullname &&
 			!errors.phone &&
 			!errors.lecturer_id &&
-			!errors.username
+			!errors.gender
 		)
 			if (errors.faculty && errors.no_of_groups) {
 				setPageNo(2);
@@ -130,7 +133,7 @@ const LecSignup = () => {
 						</div>
 
 						<div className="block">
-							<label htmlFor="name">
+							<label htmlFor="id">
 								Identification Number <span>(ID)</span>
 							</label>
 							<input
@@ -140,20 +143,17 @@ const LecSignup = () => {
 								{...register("lecturer_id")}
 							/>
 						</div>
-
 						<div className="block">
-							<label htmlFor="username">
-								Please enter a username
-							</label>
-							<input
-								type="text"
-								placeholder="e.g., Emmanuel Asamoah"
-								{...register("username")}
-							/>
+							<label htmlFor="gender">Gender</label>
+							<select id="gender" {...register("gender")}>
+								<option value="">--Select Gender--</option>
+								<option value="M">Male</option>
+								<option value="F">Female</option>
+							</select>
 						</div>
 
 						<div className="block">
-							<label htmlFor="name">Phone Number</label>
+							<label htmlFor="phone">Phone Number</label>
 							<input
 								type="phone"
 								maxLength={10}

@@ -1,3 +1,4 @@
+import emailjs from "@emailjs/browser";
 import Axios from "axios";
 import { formatDate } from "date-fns";
 import { FC, useEffect, useState } from "react";
@@ -35,6 +36,9 @@ const Attendance: FC<Props> = ({ changePage }) => {
 		setFilterStudentList(filteredStudents);
 	};
 
+	const [attendanceList, setAttendanceList] = useState<Student[]>([]);
+	const [clickedStudent, setClickedStudent] = useState<Student | null>(null);
+	const [status, setStatus] = useState<boolean | null>(null);
 	const changeStudentStatus = async (
 		studentDetails: Student,
 		present_status: Status
@@ -42,6 +46,7 @@ const Attendance: FC<Props> = ({ changePage }) => {
 		if (!studentDetails) {
 			return alert("No data provided for this operation");
 		}
+		setClickedStudent(studentDetails);
 
 		if (present_status === true || present_status === false) {
 			try {
@@ -52,20 +57,22 @@ const Attendance: FC<Props> = ({ changePage }) => {
 				};
 				const updatedList = await Axios.put(
 					"https://record-attendance.onrender.com/lec/tick_attendance",
+					// "http://localhost:4002/lec/tick_attendance",
 					body
 				);
 
 				setAttendanceList(updatedList.data);
 			} catch (error: any) {
 				console.log("🚀 ~ error:", error);
-				if (error) {
-					const { data: err } = error.data;
-					alert(err);
-				}
+				setShowErrorMessage(true);
+				setError({
+					header: "Unexpected Error",
+					description:
+						"An unexpected error occurred. Please try again.",
+				});
 			}
 		}
 	};
-	const [attendanceList, setAttendanceList] = useState<Student[]>([]);
 
 	useEffect(() => {
 		let { href: navigateTo } = window.location;
@@ -102,6 +109,73 @@ const Attendance: FC<Props> = ({ changePage }) => {
 		setFilterGroupID(userData?.group1);
 	}, []);
 
+	const sendEmail = async (
+		studentDetails: Student,
+		status: boolean | null
+	) => {
+		const params = {
+			to_name: studentDetails.fullname,
+			to_index_number: studentDetails.index_number,
+			status: status ? "PRESENT" : "ABSENT",
+			to_email: studentDetails.email,
+			date: formatDate(new Date(), "EEE LLL dd yyyy"),
+			time: formatDate(new Date(), "K:mm aaa"),
+			// ?Add coursecode to db and userData
+			course_code: "AFR-297",
+			// ?Add Gender to db and userData
+			lecturer_name: `Mr/Mrs/Miss ${userData?.fullname}`,
+			instructor_email: userData?.email,
+		};
+
+		(function () {
+			emailjs.init({
+				publicKey: "1sf3DhDraEHQxm8bN",
+			});
+		})();
+
+		if (studentDetails.email && status !== null) {
+			try {
+				emailjs
+					.send("attendance_service", "attendance_template", params)
+					.then(
+						() => {
+							return;
+						},
+						(error) => {
+							setShowErrorMessage(true);
+							if (error.message?.includes("Failed to fetch")) {
+								setError({
+									header: "Failed to fetch",
+									description:
+										"Check your internet connection and try again.",
+								});
+							} else {
+								setError({
+									header: "Unexpected Error",
+									description:
+										"An unexpected error occurredd. Please try again.",
+								});
+							}
+
+							return;
+						}
+					);
+			} catch (error) {
+				setShowErrorMessage(true);
+				setError({
+					header: "Unexpected Error",
+					description:
+						"An unexpected error occurredd. Please try again.",
+				});
+
+				return;
+			}
+		}
+	};
+	useEffect(() => {
+		clickedStudent && sendEmail(clickedStudent, status);
+	}, [clickedStudent, status]);
+
 	const renderStudentRow = (student: Student, index: number) => (
 		<tr key={student.index_number}>
 			<td>{index + 1}</td>
@@ -125,7 +199,10 @@ const Attendance: FC<Props> = ({ changePage }) => {
 									: false
 								: false
 						}
-						onChange={() => changeStudentStatus(student, true)}
+						onChange={() => {
+							changeStudentStatus(student, true);
+							setStatus(true);
+						}}
 					/>
 					<span>Present</span>
 				</div>
@@ -143,7 +220,10 @@ const Attendance: FC<Props> = ({ changePage }) => {
 								? student.present_status === false
 								: false
 						}
-						onChange={() => changeStudentStatus(student, false)}
+						onChange={() => {
+							changeStudentStatus(student, false);
+							setStatus(false);
+						}}
 					/>
 					<span>Absent</span>
 				</div>

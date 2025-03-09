@@ -44,7 +44,7 @@ type Student = {
 	fullname: string;
 	groupid: GroupID;
 	email: string;
-	present_status?: boolean | null;
+	present_status: boolean | null;
 	attendance_date: Date;
 };
 
@@ -60,8 +60,8 @@ type Lecturer = {
 	phone: string;
 	email: string;
 	fullname: string;
+	gender: "M" | "F";
 	lecturer_id: string;
-	username: string;
 };
 
 type GroupID = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "";

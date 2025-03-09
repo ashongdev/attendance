@@ -26,6 +26,27 @@ const LecSignup3: FC<Props> = ({
 		}
 	}, [pageNo]);
 
+	useEffect(() => {
+		if (
+			!errors.fullname &&
+			!errors.phone &&
+			!errors.id &&
+			!errors.faculty &&
+			!errors.group1 &&
+			!errors.group2 &&
+			!errors.group3 &&
+			!errors.group4 &&
+			!errors.lecturer_id &&
+			!errors.no_of_groups &&
+			!errors.email &&
+			!errors.password &&
+			!errors.confirmPassword
+		) {
+			// if (!errors.email && !errors.password && !errors.confirmPassword)
+			setPageNo(4);
+		}
+	}, [errors]);
+
 	return (
 		<>
 			<section

@@ -57,12 +57,12 @@ const LecSignup2: FC<Props> = ({
 			!errors.fullname &&
 			!errors.phone &&
 			!errors.id &&
-			!errors.username &&
 			!errors.faculty &&
 			!errors.group1 &&
 			!errors.group2 &&
 			!errors.group3 &&
 			!errors.group4 &&
+			!errors.lecturer_id &&
 			!errors.no_of_groups
 		) {
 			if (errors.email && errors.password && errors.confirmPassword)
