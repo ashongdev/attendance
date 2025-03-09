@@ -61,49 +61,49 @@ const generateCode = async (req: any, res: Response): Promise<void> => {
 				htmlContent: HTML(code, fullname),
 			};
 
-			// apiInstance
-			// 	.sendTransacEmail(sendSmtpEmail)
-			// 	.then(async () => {
-			const sql = await pool.query(
-				`SELECT * FROM LECTURERS WHERE LECTURER_ID = $1`,
-				[lecturer_id]
-			);
+			apiInstance
+				.sendTransacEmail(sendSmtpEmail)
+				.then(async () => {
+					const sql = await pool.query(
+						`SELECT * FROM LECTURERS WHERE LECTURER_ID = $1`,
+						[lecturer_id]
+					);
 
-			if (sql.rows.length < 1) {
-				await pool.query(
-					`INSERT INTO LECTURERS(LECTURER_ID, NAME, EMAIL, PHONE, FACULTY, PASSWORD, FULLNAME, NO_OF_GROUPS, GENDER, GROUP1, GROUP2, GROUP3, GROUP4) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
-					[
-						lecturer_id,
-						fullname,
-						userEmail,
-						phone,
-						faculty,
-						hashedPassword,
-						fullname,
-						no_of_groups,
-						gender,
-						group1,
-						group2,
-						group3,
-						group4,
-					]
-				);
-				await pool.query(
-					`INSERT INTO AUTHCODE(LECTURER_ID, CODE) VALUES($1, $2)`,
-					[lecturer_id, hashedCode]
-				);
-			} else {
-				await pool.query(
-					`UPDATE AUTHCODE SET CODE = $1 WHERE LECTURER_ID = $2`,
-					[hashedCode, lecturer_id]
-				);
-			}
-			res.status(200).json({ ok: true });
-			// })
-			// .catch((error: any) => {
-			// 	console.log(error);
-			// 	res.status(400).json({ ok: false });
-			// });
+					if (sql.rows.length < 1) {
+						await pool.query(
+							`INSERT INTO LECTURERS(LECTURER_ID, NAME, EMAIL, PHONE, FACULTY, PASSWORD, FULLNAME, NO_OF_GROUPS, GENDER, GROUP1, GROUP2, GROUP3, GROUP4) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+							[
+								lecturer_id,
+								fullname,
+								userEmail,
+								phone,
+								faculty,
+								hashedPassword,
+								fullname,
+								no_of_groups,
+								gender,
+								group1,
+								group2,
+								group3,
+								group4,
+							]
+						);
+						await pool.query(
+							`INSERT INTO AUTHCODE(LECTURER_ID, CODE) VALUES($1, $2)`,
+							[lecturer_id, hashedCode]
+						);
+					} else {
+						await pool.query(
+							`UPDATE AUTHCODE SET CODE = $1 WHERE LECTURER_ID = $2`,
+							[hashedCode, lecturer_id]
+						);
+					}
+					res.status(200).json({ ok: true });
+				})
+				.catch((error: any) => {
+					console.log(error);
+					res.status(400).json({ ok: false });
+				});
 		}
 	} catch (error: any) {
 		console.log("🚀 ~ generateCode ~ error:", error.message);
