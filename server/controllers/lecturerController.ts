@@ -37,6 +37,7 @@ const generateCode = async (req: any, res: Response): Promise<void> => {
 			arrNum.push(randomNum);
 		}
 		const code = arrNum.join("");
+		console.log("🚀 ~ generateCode ~ code:", code);
 
 		if (!userEmail || !code || !fullname) {
 			console.log("An Unexpected error occurred!");
@@ -60,49 +61,49 @@ const generateCode = async (req: any, res: Response): Promise<void> => {
 				htmlContent: HTML(code, fullname),
 			};
 
-			apiInstance
-				.sendTransacEmail(sendSmtpEmail)
-				.then(async () => {
-					const sql = await pool.query(
-						`SELECT * FROM LECTURERS WHERE LECTURER_ID = $1`,
-						[lecturer_id]
-					);
+			// apiInstance
+			// 	.sendTransacEmail(sendSmtpEmail)
+			// 	.then(async () => {
+			const sql = await pool.query(
+				`SELECT * FROM LECTURERS WHERE LECTURER_ID = $1`,
+				[lecturer_id]
+			);
 
-					if (sql.rows.length < 1) {
-						await pool.query(
-							`INSERT INTO LECTURERS(LECTURER_ID, NAME, EMAIL, PHONE, FACULTY, PASSWORD, FULLNAME, NO_OF_GROUPS, GENDER, GROUP1, GROUP2, GROUP3, GROUP4) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
-							[
-								lecturer_id,
-								fullname,
-								userEmail,
-								phone,
-								faculty,
-								hashedPassword,
-								fullname,
-								no_of_groups,
-								gender,
-								group1,
-								group2,
-								group3,
-								group4,
-							]
-						);
-						await pool.query(
-							`INSERT INTO AUTHCODE(LECTURER_ID, CODE) VALUES($1, $2)`,
-							[lecturer_id, hashedCode]
-						);
-					} else {
-						await pool.query(
-							`UPDATE AUTHCODE SET CODE = $1 WHERE LECTURER_ID = $2`,
-							[hashedCode, lecturer_id]
-						);
-					}
-					res.status(200).json({ ok: true });
-				})
-				.catch((error: any) => {
-					console.log(error);
-					res.status(400).json({ ok: false });
-				});
+			if (sql.rows.length < 1) {
+				await pool.query(
+					`INSERT INTO LECTURERS(LECTURER_ID, NAME, EMAIL, PHONE, FACULTY, PASSWORD, FULLNAME, NO_OF_GROUPS, GENDER, GROUP1, GROUP2, GROUP3, GROUP4) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+					[
+						lecturer_id,
+						fullname,
+						userEmail,
+						phone,
+						faculty,
+						hashedPassword,
+						fullname,
+						no_of_groups,
+						gender,
+						group1,
+						group2,
+						group3,
+						group4,
+					]
+				);
+				await pool.query(
+					`INSERT INTO AUTHCODE(LECTURER_ID, CODE) VALUES($1, $2)`,
+					[lecturer_id, hashedCode]
+				);
+			} else {
+				await pool.query(
+					`UPDATE AUTHCODE SET CODE = $1 WHERE LECTURER_ID = $2`,
+					[hashedCode, lecturer_id]
+				);
+			}
+			res.status(200).json({ ok: true });
+			// })
+			// .catch((error: any) => {
+			// 	console.log(error);
+			// 	res.status(400).json({ ok: false });
+			// });
 		}
 	} catch (error: any) {
 		console.log("🚀 ~ generateCode ~ error:", error.message);
@@ -345,38 +346,46 @@ const compareCode = async (req: any, res: Response) => {
 const tickAttendance = async (req: Request, res: Response): Promise<void> => {
 	if (!req.body) {
 		console.log({ error: "No data provided for this operation" });
-
 		res.status(403).json({ error: "No data provided for this operation" });
+		return;
 	}
 
 	const { present_status, index_number, groupid } = req.body;
 
 	try {
 		const checkID = await pool.query(
-			`SELECT STUDENT_ID, ATTENDANCE_DATE FROM ATTENDANCE WHERE STUDENT_ID = $1 AND DATE(ATTENDANCE_DATE) = DATE($2)`,
-			[index_number, new Date()]
+			`SELECT STUDENT_ID FROM ATTENDANCE WHERE STUDENT_ID = $1 AND ATTENDANCE_DATE::DATE = CURRENT_DATE`,
+			[index_number]
 		);
 
 		if (checkID.rows.length === 1) {
-			console.log("Updated");
 			await pool.query(
-				`UPDATE ATTENDANCE SET PRESENT_STATUS = $1, ATTENDANCE_DATE = $2 WHERE STUDENT_ID = $3`,
-				[present_status, new Date(), index_number]
+				`UPDATE ATTENDANCE 
+				SET PRESENT_STATUS = $1, ATTENDANCE_DATE = NOW() 
+				WHERE STUDENT_ID = $2 AND ATTENDANCE_DATE::DATE = CURRENT_DATE`,
+				[present_status, index_number]
 			);
-		} else if (checkID.rows.length < 1) {
+		} else {
 			const randomUUID = uuid();
+
 			await pool.query(
-				`INSERT INTO ATTENDANCE (ATTENDANCE_ID, STUDENT_ID, PRESENT_STATUS) VALUES($1, $2, $3)`,
+				`INSERT INTO ATTENDANCE (ATTENDANCE_ID, STUDENT_ID, PRESENT_STATUS, ATTENDANCE_DATE) 
+				VALUES($1, $2, $3, NOW())`,
 				[randomUUID, index_number, present_status]
 			);
 		}
+
 		const response = await pool.query(
-			`SELECT DISTINCT ON (S.INDEX_NUMBER) A.PRESENT_STATUS, A.ATTENDANCE_DATE, INDEX_NUMBER, FULLNAME, GROUPID, EMAIL, DATE_OF_BIRTH FROM STUDENTS AS S
-			LEFT JOIN ATTENDANCE AS A
-			ON S.INDEX_NUMBER = A.STUDENT_ID
-			WHERE S.GROUPID = $1 ORDER BY S.INDEX_NUMBER, A.ATTENDANCE_DATE DESC`,
+			`SELECT DISTINCT ON (S.INDEX_NUMBER) 
+				A.PRESENT_STATUS, A.ATTENDANCE_DATE, S.INDEX_NUMBER, S.FULLNAME, 
+				S.GROUPID, S.EMAIL, S.DATE_OF_BIRTH 
+			FROM STUDENTS AS S
+			LEFT JOIN ATTENDANCE AS A ON S.INDEX_NUMBER = A.STUDENT_ID
+			WHERE S.GROUPID = $1 
+			ORDER BY S.INDEX_NUMBER, A.ATTENDANCE_DATE DESC`,
 			[groupid]
 		);
+
 		res.status(201).json(response.rows);
 	} catch (err: any) {
 		const error = await handleErrors(err);
@@ -410,12 +419,45 @@ const authenticate = async (req: Request, res: Response): Promise<void> => {
 	}
 };
 
+const generateSheetReport = async (req: Request, res: Response) => {
+	const { groupid } = req.params;
+
+	if (!groupid || groupid === "undefined") {
+		res.status(404).json({ ok: false });
+		return;
+	}
+
+	try {
+		const sql = await pool.query(
+			`SELECT 
+			s.groupid,
+			a.student_id, 
+			s.fullname,  
+			COUNT(CASE WHEN a.present_status = true THEN 1 END) AS days_present,
+			COUNT(CASE WHEN a.present_status = false THEN 1 END) AS days_absent,
+			COUNT(*) AS total_days
+			FROM attendance a
+			JOIN students s ON a.student_id = s.index_number
+			WHERE s.groupid = $1 
+			GROUP BY s.groupid, a.student_id, s.fullname
+			ORDER BY a.student_id;`,
+			[groupid]
+		);
+
+		res.status(200).json(sql.rows);
+	} catch (error) {
+		console.log("🚀 ~ generateSheetReport ~ error:", error);
+		res.status(403).json(error);
+	}
+};
+
 export {
 	addStudent,
 	authenticate,
 	compareCode,
 	editStudentInfo,
 	generateCode,
+	generateSheetReport,
 	getStudentsAttendanceList,
 	getStudentsList,
 	removeStudent,

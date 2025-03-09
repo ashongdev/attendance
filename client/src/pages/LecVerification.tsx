@@ -115,6 +115,8 @@ const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
 				setShowVerificationErr(false);
 				setShowAlertPopup(true);
 
+				window.location.href = "/";
+
 				authenticateLecturer(id);
 			}
 		} catch (error: any) {
@@ -149,7 +151,6 @@ const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
 	useEffect(() => {
 		localStorage.removeItem("auth");
 		localStorage.removeItem("filterGroupID");
-		localStorage.removeItem("page");
 	}, []);
 
 	return (

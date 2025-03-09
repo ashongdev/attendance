@@ -6,6 +6,7 @@ import {
 	compareCode,
 	editStudentInfo,
 	generateCode,
+	generateSheetReport,
 	getStudentsAttendanceList,
 	getStudentsList,
 	removeStudent,
@@ -29,6 +30,7 @@ router.get("/lec/students/:groups", getStudentsList);
 router.get("/lec/students/attendance/:groupid", getStudentsAttendanceList);
 router.get("/lec/verify/:userEmail", generateCode);
 router.get("/lec/compare/:id", compareCode);
+router.get("/lec/report/:groupid", generateSheetReport);
 
 router.post("/lec/add-student", addStudent);
 router.post("/lec/signup", signup);

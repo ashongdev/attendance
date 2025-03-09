@@ -1,15 +1,13 @@
 import { useEffect, useState } from "react";
 import useContextProvider from "../hooks/useContextProvider";
-import useFunctions from "../hooks/useFunctions";
 import lateIcon from "../images/alarm-outline.svg";
 import presentIcon from "../images/checkmark-circle-outline.svg";
 import absentIcon from "../images/close-circle-outline.svg";
 import personIcon from "../images/user-regular.svg";
 
 const Dashboard = () => {
-	const { studentsList, userData, authenticateLecturer } =
+	const { studentsList, userData, authenticateLecturer, setPage } =
 		useContextProvider();
-	const { getStudentsList } = useFunctions();
 	const [totalPresent, setTotalPresent] = useState(0);
 	const [totalAbsent, setTotalAbsent] = useState(0);
 	const [totalNotMarked, setTotalNotMarked] = useState(0);
@@ -27,13 +25,8 @@ const Dashboard = () => {
 		return { totalAbsent, totalPresent };
 	};
 	useEffect(() => {
-		// Get students for all courses the lecturer teaches
-		// getStudentsList(
-		// 	setStudentsList,
-		// 	setShowErrorMessage,
-		// 	setError,
-		// 	userData.groupid
-		// );
+		setPage(window.location.pathname);
+
 		if (!userData) return;
 
 		authenticateLecturer(userData.lecturer_id);

@@ -1,18 +1,14 @@
 import emailjs from "@emailjs/browser";
 import Axios from "axios";
 import { formatDate } from "date-fns";
-import { FC, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ErrorAlert from "../components/ErrorAlert";
-import { GroupID, Page, Status, Student } from "../exports/exports";
+import { GroupID, Status, Student } from "../exports/exports";
 import useContextProvider from "../hooks/useContextProvider";
 import useFunctions from "../hooks/useFunctions";
 
-interface Props {
-	changePage: (val: Page) => void;
-}
-
-const Attendance: FC<Props> = ({ changePage }) => {
+const Attendance = () => {
 	const { getStudentsAttendanceList, getStorageItem } = useFunctions();
 	const {
 		setShowErrorMessage,
@@ -21,6 +17,7 @@ const Attendance: FC<Props> = ({ changePage }) => {
 		error,
 		userData,
 		authenticateLecturer,
+		setPage,
 	} = useContextProvider();
 
 	const [filterGroupID, setFilterGroupID] = useState<GroupID | undefined>(
@@ -75,7 +72,6 @@ const Attendance: FC<Props> = ({ changePage }) => {
 	};
 
 	useEffect(() => {
-		let { href: navigateTo } = window.location;
 		filterStudents(filterGroupID);
 
 		if (userData)
@@ -87,7 +83,7 @@ const Attendance: FC<Props> = ({ changePage }) => {
 					userData.group4 === "")
 			) {
 				localStorage.removeItem("auth");
-				navigateTo = "/signup";
+				window.location.href = "/signup";
 			}
 
 		localStorage.setItem("filterGroupID", JSON.stringify(filterGroupID));
@@ -103,6 +99,8 @@ const Attendance: FC<Props> = ({ changePage }) => {
 	}, [filterGroupID]);
 
 	useEffect(() => {
+		setPage(window.location.pathname);
+
 		if (!userData) return;
 
 		userData && authenticateLecturer(userData.lecturer_id);
@@ -123,7 +121,9 @@ const Attendance: FC<Props> = ({ changePage }) => {
 			// ?Add coursecode to db and userData
 			course_code: "AFR-297",
 			// ?Add Gender to db and userData
-			lecturer_name: `Mr/Mrs/Miss ${userData?.fullname}`,
+			lecturer_name: `${userData?.gender === "M" ? "Mr." : "Mrs/Miss."} ${
+				userData?.fullname
+			}`,
 			instructor_email: userData?.email,
 		};
 
@@ -173,7 +173,9 @@ const Attendance: FC<Props> = ({ changePage }) => {
 		}
 	};
 	useEffect(() => {
-		clickedStudent && sendEmail(clickedStudent, status);
+		clickedStudent &&
+			(status !== null || status !== undefined) &&
+			sendEmail(clickedStudent, status);
 	}, [clickedStudent, status]);
 
 	const renderStudentRow = (student: Student, index: number) => (
@@ -182,8 +184,8 @@ const Attendance: FC<Props> = ({ changePage }) => {
 			<td>{student.index_number}</td>
 			<td>{student.fullname}</td>
 			<td>{student.email}</td>
-			<td>{student.groupid}</td>
-			<td>
+			<td className="groupid">{student.groupid}</td>
+			<td className="status">
 				<div>
 					<input
 						type="radio"
@@ -237,16 +239,9 @@ const Attendance: FC<Props> = ({ changePage }) => {
 			<div className="top">
 				<div>
 					<span>
-						<Link to="/" onClick={() => changePage("Home")}>
-							Home
-						</Link>
+						<Link to="/">Home</Link>
 						{" > "}
-						<Link
-							onClick={() => setFilterGroupID("")}
-							to="/attendance"
-						>
-							Attendance
-						</Link>
+						<Link to="/attendance">Attendance</Link>
 						{" > "}
 						{filterGroupID && (
 							<>

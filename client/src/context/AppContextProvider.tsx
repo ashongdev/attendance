@@ -1,12 +1,6 @@
 import Axios from "axios";
 import { ReactNode, useEffect, useRef, useState } from "react";
-import {
-	ContextProvider,
-	Lecturer,
-	Mode,
-	Page,
-	Student,
-} from "../exports/exports";
+import { ContextProvider, Lecturer, Mode, Student } from "../exports/exports";
 import useFunctions from "../hooks/useFunctions";
 
 // const socket = io("http://localhost:4000");
@@ -34,7 +28,7 @@ const Context = ({ children }: { children: ReactNode }) => {
 		description: "",
 	});
 	const [openModal, setOpenModal] = useState(false);
-	const [page, setPage] = useState<Page>(getStorageItem("page", null));
+	const [page, setPage] = useState<string>("");
 
 	const alertTimeout = useRef<NodeJS.Timeout | null>(null);
 	const errorTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -88,7 +82,6 @@ const Context = ({ children }: { children: ReactNode }) => {
 			console.log("🚀 ~ authenticateLecturer ~ error:", error);
 			localStorage.removeItem("auth");
 			localStorage.removeItem("filterGroupID");
-			localStorage.removeItem("page");
 
 			window.location.href = "/signup";
 
@@ -96,10 +89,6 @@ const Context = ({ children }: { children: ReactNode }) => {
 		}
 	};
 
-	const changePage = (page: Page) => {
-		setPage(page);
-		localStorage.setItem("page", JSON.stringify(page));
-	};
 	return (
 		<ContextProvider.Provider
 			value={{
@@ -120,7 +109,6 @@ const Context = ({ children }: { children: ReactNode }) => {
 				setUserData,
 				page,
 				setPage,
-				changePage,
 				setTimeLeft,
 				minutes,
 				seconds,

@@ -47,7 +47,6 @@ th {
 td {
 	padding: 1rem;
 	font-size: 1.1rem;
-	/* text-transform: uppercase; */
 }
 td div {
 	display: flex;
@@ -56,18 +55,42 @@ td div {
 	flex-direction: column;
 }
 td:first-child,
-td:nth-child(5) {
+td.groupid,
+td.days {
 	text-align: center;
 }
 td:nth-child(2) {
 	width: 10rem;
 }
-td:last-child {
+td.status {
 	display: flex;
 	justify-content: space-around;
 	border: 1px solid #dbdddf;
 	border-bottom: none;
 	border-left: none;
+}
+.search {
+	display: flex;
+	gap: 1rem;
+	justify-content: center;
+	align-items: center;
+}
+.search .option {
+	min-width: 10rem;
+	width: 15rem;
+}
+.search input {
+	min-width: 10rem;
+	width: 20rem;
+}
+@media (max-width: 550px) {
+	.search {
+		flex-direction: column;
+	}
+	.search .option,
+	.search input {
+		width: 100%;
+	}
 }
 
 /* Add Student */

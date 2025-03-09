@@ -1,20 +1,16 @@
-import { FC, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Confirm from "../components/ConfirmationModal";
 import ErrorAlert from "../components/ErrorAlert";
 import Form from "../components/Form";
 import SuccessAlert from "../components/SuccessAlert";
-import { Page, Student } from "../exports/exports";
+import { Student } from "../exports/exports";
 import useContextProvider from "../hooks/useContextProvider";
 import useFunctions from "../hooks/useFunctions";
 import editIcon from "../images/create-outline.svg";
 import trashCanIcon from "../images/trash-outline.svg";
 
-interface Props {
-	changePage: (val: Page) => void;
-}
-
-const List: FC<Props> = ({ changePage }) => {
+const List = () => {
 	const { getStudentsList } = useFunctions();
 	const {
 		studentsList,
@@ -31,6 +27,7 @@ const List: FC<Props> = ({ changePage }) => {
 		setOpenModal,
 		userData,
 		authenticateLecturer,
+		setPage,
 	} = useContextProvider();
 
 	const [studentToBeEdited, setStudentToBeEdited] = useState<
@@ -48,6 +45,8 @@ const List: FC<Props> = ({ changePage }) => {
 	};
 
 	useEffect(() => {
+		setPage(window.location.pathname);
+
 		if (!userData) return;
 
 		authenticateLecturer(userData.lecturer_id);
@@ -80,10 +79,7 @@ const List: FC<Props> = ({ changePage }) => {
 			<div className="top">
 				<div>
 					<span>
-						<Link to="/" onClick={() => changePage("Home")}>
-							Home
-						</Link>{" "}
-						{"> "}
+						<Link to="/">Home</Link> {"> "}
 						<Link to="/list">Students</Link>
 						{" > "}
 						{studentsList &&
@@ -131,8 +127,10 @@ const List: FC<Props> = ({ changePage }) => {
 									<td>{student.index_number}</td>
 									<td>{student.fullname}</td>
 									<td>{student.email}</td>
-									<td>{student.groupid}</td>
-									<td>
+									<td className="groupid">
+										{student.groupid}
+									</td>
+									<td className="status">
 										<button
 											onClick={() => {
 												setOpenModal(true);

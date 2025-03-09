@@ -14,27 +14,21 @@ import Dashboard from "./pages/Dashboard";
 import LecSignup from "./pages/LecSignup.tsx";
 import List from "./pages/List";
 import PageNotFound from "./pages/PageNotFound.tsx";
+import Report from "./pages/Report.tsx";
 
 // !Download Oh MY ZSH for my terminal
 // todo: Add loader styles to css
 // ! create more pages asking the groupid, name and index number to autofill forms
-// !restrict student from checking in if detaild from localstorage matches the new one
+// !restrict student from checking in if details from localstorage matches the new one
 
 // !rnfz
 const RenderSideBar = ({ children }: { children: ReactNode }) => {
 	const [showSideBar, setShowSideBar] = useState(false);
-	const { changePage, page } = useContextProvider();
 
 	return (
 		<main style={{ marginLeft: showSideBar ? "15rem" : "0rem" }}>
 			<Header setShowSideBar={setShowSideBar} />
-			{showSideBar && (
-				<Sidebar
-					changePage={changePage}
-					setShowSideBar={setShowSideBar}
-					page={page}
-				/>
-			)}
+			{showSideBar && <Sidebar setShowSideBar={setShowSideBar} />}
 			{children}
 		</main>
 	);
@@ -58,7 +52,7 @@ const Loading = ({ children }: { children: ReactNode }) => {
 };
 
 const App = () => {
-	const { changePage, userData } = useContextProvider();
+	const { userData } = useContextProvider();
 
 	const router = createBrowserRouter(
 		[
@@ -84,7 +78,7 @@ const App = () => {
 							<Navigate to="/signup" />
 						) : (
 							<Loading>
-								<List changePage={changePage} />
+								<List />
 							</Loading>
 						)}
 					</RenderSideBar>
@@ -98,7 +92,21 @@ const App = () => {
 							<Navigate to="/signup" />
 						) : (
 							<Loading>
-								<Attendance changePage={changePage} />
+								<Attendance />
+							</Loading>
+						)}
+					</RenderSideBar>
+				),
+			},
+			{
+				path: "/report",
+				element: (
+					<RenderSideBar>
+						{!userData ? (
+							<Navigate to="/signup" />
+						) : (
+							<Loading>
+								<Report />
 							</Loading>
 						)}
 					</RenderSideBar>
