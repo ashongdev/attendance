@@ -83,7 +83,7 @@ const Attendance = () => {
 					userData.group4 === "")
 			) {
 				localStorage.removeItem("auth");
-				window.location.href = "/signup";
+				window.location.href = "/signin";
 			}
 
 		localStorage.setItem("filterGroupID", JSON.stringify(filterGroupID));
@@ -239,7 +239,7 @@ const Attendance = () => {
 			<div className="top">
 				<div>
 					<span>
-						<Link to="/">Home</Link>
+						<Link to="/dashboard">Home</Link>
 						{" > "}
 						<Link to="/attendance">Attendance</Link>
 						{" > "}
@@ -309,12 +309,7 @@ const Attendance = () => {
 				</table>
 			</div>
 
-			{showErrorMessage && (
-				<ErrorAlert
-					error={error}
-					setShowErrorMessage={setShowErrorMessage}
-				/>
-			)}
+			{showErrorMessage && <ErrorAlert />}
 		</section>
 	);
 };

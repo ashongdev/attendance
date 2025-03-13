@@ -1,4 +1,5 @@
-import { Dispatch, FC, SetStateAction, useEffect, useRef } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef } from "react";
+import useContextProvider from "../hooks/useContextProvider";
 
 type ErrorAlertType = {
 	header: string;
@@ -9,9 +10,9 @@ interface Props {
 	error: ErrorAlertType;
 	setShowErrorMessage: Dispatch<SetStateAction<boolean>>;
 }
-const ErrorAlert: FC<Props> = ({ error, setShowErrorMessage }) => {
+const ErrorAlert = () => {
 	const timerRef = useRef<NodeJS.Timeout | null>(null);
-
+	const { error, setShowErrorMessage } = useContextProvider();
 	useEffect(() => {
 		if (timerRef.current) {
 			clearTimeout(timerRef.current);
@@ -21,6 +22,7 @@ const ErrorAlert: FC<Props> = ({ error, setShowErrorMessage }) => {
 			setShowErrorMessage(false);
 		}, 2000);
 	}, [error]);
+
 	return (
 		<div className="alert-container">
 			<div className="alert-content">

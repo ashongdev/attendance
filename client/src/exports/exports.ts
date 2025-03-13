@@ -31,7 +31,18 @@ interface ContextType {
 	seconds: number;
 	setTimeLeft: Dispatch<SetStateAction<number>>;
 	authenticateLecturer: (id: string) => void;
+	cookies: { auth?: Omit<Lecturer, "confirmPassword"> | null };
+	setCookie: (name: "auth", value: any, options?: any | undefined) => void;
+	removeCookie: Dispatch<SetStateAction<any>>;
 }
+type ReportData = {
+	days_absent: string;
+	days_present: string;
+	fullname: string;
+	groupid: GroupID;
+	student_id: string;
+	total_days: string;
+};
 
 const ContextProvider = createContext<ContextType | undefined>(undefined);
 
@@ -66,4 +77,12 @@ type GroupID = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "";
 
 type Status = boolean;
 
-export { ContextProvider, GroupID, Lecturer, Mode, Status, Student };
+export {
+	ContextProvider,
+	GroupID,
+	Lecturer,
+	Mode,
+	ReportData,
+	Status,
+	Student,
+};

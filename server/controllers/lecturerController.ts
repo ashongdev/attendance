@@ -1,5 +1,5 @@
 const brevo = require("@getbrevo/brevo");
-import bcrypt, { compare, genSalt, hash } from "bcrypt";
+import { compare, genSalt, hash } from "bcrypt";
 import { Request, Response } from "express";
 import { v4 as uuid } from "uuid";
 import { pool } from "../db";
@@ -27,86 +27,138 @@ const generateCode = async (req: any, res: Response): Promise<void> => {
 		phone,
 		gender,
 	} = userData;
-	try {
-		const saltRounds = await genSalt(10);
-		const hashedPassword = await hash(password, saltRounds);
-		arrNum = [];
+	const sql = await pool.query(
+		`SELECT * FROM LECTURERS WHERE LECTURER_ID = $1`,
+		[lecturer_id]
+	);
 
-		for (let i = 0; i < 6; i++) {
-			const randomNum = Math.floor(Math.random() * 9);
-			arrNum.push(randomNum);
-		}
-		const code = arrNum.join("");
-		console.log("🚀 ~ generateCode ~ code:", code);
-
-		if (!userEmail || !code || !fullname) {
-			console.log("An Unexpected error occurred!");
-			res.status(400).json({ error: "An Unexpected error occurred!" });
-			return;
-		}
-
-		if (userEmail && fullname && code) {
+	if (sql.rows.length <= 0) {
+		try {
 			const saltRounds = await genSalt(10);
-			const hashedCode = await hash(code, saltRounds);
+			const hashedPassword = await hash(password, saltRounds);
+			arrNum = [];
 
-			let sendSmtpEmail = new brevo.SendSmtpEmail();
+			for (let i = 0; i < 6; i++) {
+				const randomNum = Math.floor(Math.random() * 9);
+				arrNum.push(randomNum);
+			}
+			const code = arrNum.join("");
+			console.log("🚀 ~ generateCode ~ code:", code);
 
-			sendSmtpEmail = {
-				subject: "Verify Your Account – Action Required",
-				sender: {
-					name: "ClassTrack",
-					email: "recordattendance3@gmail.com",
-				},
-				to: [{ email: userEmail }],
-				htmlContent: HTML(code, fullname),
-			};
-
-			apiInstance
-				.sendTransacEmail(sendSmtpEmail)
-				.then(async () => {
-					const sql = await pool.query(
-						`SELECT * FROM LECTURERS WHERE LECTURER_ID = $1`,
-						[lecturer_id]
-					);
-
-					if (sql.rows.length < 1) {
-						await pool.query(
-							`INSERT INTO LECTURERS(LECTURER_ID, NAME, EMAIL, PHONE, FACULTY, PASSWORD, FULLNAME, NO_OF_GROUPS, GENDER, GROUP1, GROUP2, GROUP3, GROUP4) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
-							[
-								lecturer_id,
-								fullname,
-								userEmail,
-								phone,
-								faculty,
-								hashedPassword,
-								fullname,
-								no_of_groups,
-								gender,
-								group1,
-								group2,
-								group3,
-								group4,
-							]
-						);
-						await pool.query(
-							`INSERT INTO AUTHCODE(LECTURER_ID, CODE) VALUES($1, $2)`,
-							[lecturer_id, hashedCode]
-						);
-					} else {
-						await pool.query(
-							`UPDATE AUTHCODE SET CODE = $1 WHERE LECTURER_ID = $2`,
-							[hashedCode, lecturer_id]
-						);
-					}
-					res.status(200).json({ ok: true });
-				})
-				.catch((error: any) => {
-					console.log(error);
-					res.status(400).json({ ok: false });
+			if (!userEmail || !code || !fullname) {
+				console.log("An Unexpected error occurred!");
+				res.status(400).json({
+					error: "An Unexpected error occurred!",
 				});
+				return;
+			}
+
+			if (userEmail && fullname && code) {
+				const saltRounds = await genSalt(10);
+				const hashedCode = await hash(code, saltRounds);
+
+				let sendSmtpEmail = new brevo.SendSmtpEmail();
+
+				sendSmtpEmail = {
+					subject: "Verify Your Account – Action Required",
+					sender: {
+						name: "ClassTrack",
+						email: "recordattendance3@gmail.com",
+					},
+					to: [{ email: userEmail }],
+					htmlContent: HTML(code, fullname),
+				};
+
+				apiInstance
+					.sendTransacEmail(sendSmtpEmail)
+					.then(async () => {
+						if (sql.rows.length < 1) {
+							await pool.query(
+								`INSERT INTO LECTURERS(LECTURER_ID, NAME, EMAIL, PHONE, FACULTY, PASSWORD, FULLNAME, NO_OF_GROUPS, GENDER, GROUP1, GROUP2, GROUP3, GROUP4) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+								[
+									lecturer_id,
+									fullname,
+									userEmail,
+									phone,
+									faculty,
+									hashedPassword,
+									fullname,
+									no_of_groups,
+									gender,
+									group1,
+									group2,
+									group3,
+									group4,
+								]
+							);
+							await pool.query(
+								`INSERT INTO AUTHCODE(LECTURER_ID, CODE) VALUES($1, $2)`,
+								[lecturer_id, hashedCode]
+							);
+
+							res.status(200).json({ ok: true });
+						} else {
+							res.status(403).json({
+								error: "User already exists.",
+							});
+							return;
+						}
+					})
+					.catch((error: any) => {
+						console.log(error);
+						res.status(400).json({ ok: false });
+					});
+			}
+		} catch (error: any) {
+			console.log("🚀 ~ generateCode ~ error:", error.message);
+			res.status(403).json(error);
+		}
+	} else {
+		res.status(403).json({
+			error: "User already exists.",
+		});
+	}
+};
+
+const signIn = async (req: any, res: Response): Promise<void> => {
+	const { lecturer_id, password } = req.body;
+
+	if (!lecturer_id) {
+		return;
+	}
+
+	try {
+		const sql = await pool.query(
+			`SELECT PASSWORD FROM LECTURERS WHERE LECTURER_ID = $1 AND IS_VERIFIED = TRUE`,
+			[lecturer_id]
+		);
+
+		if (sql.rows.length > 0) {
+			const hashedPassword = sql.rows[0].password;
+			const comparePass = await compare(password, hashedPassword);
+
+			if (comparePass) {
+				const fields = await pool.query(
+					`SELECT LECTURER_ID, GENDER, NAME, EMAIL, FACULTY, FULLNAME, NO_OF_GROUPS, GROUP1, GROUP2, GROUP3, GROUP4 FROM LECTURERS WHERE LECTURER_ID = $1 AND IS_VERIFIED = TRUE`,
+					[lecturer_id]
+				);
+
+				if (fields.rows.length > 0) {
+					res.status(201).json(fields.rows[0]);
+				} else {
+					res.status(404).json({ error: "User not found" });
+				}
+				return;
+			} else {
+				res.status(403).json({
+					error: "ID or Password does not match.",
+				});
+			}
+		} else {
+			res.status(404).json({ error: "User not found" });
 		}
 	} catch (error: any) {
-		console.log("🚀 ~ generateCode ~ error:", error.message);
+		console.log("🚀 ~ signIn ~ error:", error.message);
 		res.status(403).json(error);
 	}
 };
@@ -271,33 +323,6 @@ const removeStudent = async (req: Request, res: Response) => {
 	}
 };
 
-const signup = async (req: Request, res: Response) => {
-	const { id, email, phone, fullname, faculty, no_of_groups, password } =
-		req.body;
-
-	try {
-		const salt = await genSalt(10);
-		const hashedPassword = await bcrypt.hash(password, salt);
-		await pool.query(
-			`INSERT INTO LECTURERS (LECTURER_ID, NAME, EMAIL, PHONE, FACULTY, PASSWORD,FULLNAME, NO_OF_GROUPS) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-			[
-				id,
-				fullname,
-				email,
-				phone,
-				faculty,
-				hashedPassword,
-				fullname,
-				no_of_groups,
-			]
-		);
-	} catch (err) {
-		console.log("🚀 ~ signup ~ err:", err);
-		const error = await handleErrors(err);
-		res.status(403).json(error);
-	}
-};
-
 const compareCode = async (req: any, res: Response) => {
 	const { id: lecturerId } = req.params;
 	const { code } = req.query;
@@ -345,7 +370,6 @@ const compareCode = async (req: any, res: Response) => {
 
 const tickAttendance = async (req: Request, res: Response): Promise<void> => {
 	if (!req.body) {
-		console.log({ error: "No data provided for this operation" });
 		res.status(403).json({ error: "No data provided for this operation" });
 		return;
 	}
@@ -461,6 +485,6 @@ export {
 	getStudentsAttendanceList,
 	getStudentsList,
 	removeStudent,
-	signup,
+	signIn,
 	tickAttendance,
 };

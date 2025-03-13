@@ -1,10 +1,10 @@
-.signin-cont {
+.form-container {
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	margin-top: 3rem;
 }
-.signin-cont form {
+.form-container form {
 	width: 30rem;
 }
 .flex {

@@ -82,7 +82,8 @@ const Form: FC<Props> = ({
 				setStudentsList,
 				setOpenModal,
 				setShowAlertPopup,
-				setMode
+				setMode,
+				setError
 			);
 		}
 	};

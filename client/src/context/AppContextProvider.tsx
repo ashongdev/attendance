@@ -1,5 +1,6 @@
 import Axios from "axios";
 import { ReactNode, useEffect, useRef, useState } from "react";
+import { useCookies } from "react-cookie";
 import { ContextProvider, Lecturer, Mode, Student } from "../exports/exports";
 import useFunctions from "../hooks/useFunctions";
 
@@ -15,12 +16,13 @@ const Context = ({ children }: { children: ReactNode }) => {
 	const [timeLeft, setTimeLeft] = useState(0 * 60); // 5 minutes in seconds
 	const minutes = Math.floor(timeLeft / 60);
 	const seconds = timeLeft % 60;
+	const [cookies, setCookie, removeCookie] = useCookies(["auth"]);
 
 	const [mode, setMode] = useState<Mode>("");
 	const [userData, setUserData] = useState<Omit<
 		Lecturer,
 		"confirmPassword"
-	> | null>(getStorageItem("auth", null));
+	> | null>(cookies.auth);
 	const [showErrorMessage, setShowErrorMessage] = useState(false);
 	const [showAlertPopup, setShowAlertPopup] = useState(false);
 	const [error, setError] = useState({
@@ -74,16 +76,18 @@ const Context = ({ children }: { children: ReactNode }) => {
 				// `http://localhost:4002/lec/auth/${id}`
 				`https://record-attendance.onrender.com/lec/auth/${id}`
 			);
-			localStorage.setItem("auth", JSON.stringify(res.data));
+			setCookie("auth", res.data, {
+				httpOnly: true,
+				secure: true,
+			});
 			setUserData(res.data);
 
 			return;
 		} catch (error) {
-			console.log("🚀 ~ authenticateLecturer ~ error:", error);
-			localStorage.removeItem("auth");
+			removeCookie("auth");
 			localStorage.removeItem("filterGroupID");
 
-			window.location.href = "/signup";
+			window.location.href = "/signin";
 
 			return;
 		}
@@ -113,6 +117,9 @@ const Context = ({ children }: { children: ReactNode }) => {
 				minutes,
 				seconds,
 				authenticateLecturer,
+				cookies,
+				setCookie,
+				removeCookie,
 			}}
 		>
 			{children}

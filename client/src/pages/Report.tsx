@@ -66,21 +66,24 @@ const Report = () => {
 		}
 	}, [filterGroupID]);
 
-	const renderStudentRow = (student: any, index: number) => (
-		<tr key={student.student_id}>
-			<td>{index + 1}</td>
-			<td>{student.student_id}</td>
-			<td>{student.fullname}</td>
-			<td className="days">{student.days_present}</td>
-			<td className="days">{student.days_absent}</td>
-			<td className="days">{student.total_days}</td>
-			<td className="days">
-				{(Number(student.days_present) / Number(student.total_days)) *
-					100}
-				%
-			</td>
-		</tr>
-	);
+	const renderStudentRow = (student: any, index: number) => {
+		const percent = (
+			(Number(student.days_present) / Number(student.total_days)) *
+			100
+		).toFixed(2);
+
+		return (
+			<tr key={student.student_id}>
+				<td>{index + 1}</td>
+				<td>{student.student_id}</td>
+				<td>{student.fullname}</td>
+				<td className="days">{student.days_present}</td>
+				<td className="days">{student.days_absent}</td>
+				<td className="days">{student.total_days}</td>
+				<td className="days">{percent}%</td>
+			</tr>
+		);
+	};
 
 	useEffect(() => {
 		if (reportData && reportData.length > 1) {
@@ -104,7 +107,7 @@ const Report = () => {
 			<div className="top">
 				<div>
 					<span>
-						<Link to="/">Home</Link>
+						<Link to="/dashboard">Home</Link>
 						{" > "}
 						<Link to="/report">Report</Link>
 						{" > "}

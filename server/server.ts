@@ -3,6 +3,7 @@ import { config } from "dotenv";
 import express from "express";
 // import { createServer } from "node:http";
 // import { Socket } from "socket.io";
+import cookieParser from "cookie-parser";
 import { pool } from "./db";
 import lecturerRoutes from "./routes/lecturerRoutes";
 import studentRoutes from "./routes/studentRoutes";
@@ -25,14 +26,15 @@ const app = express();
 
 const corsOptions = {
 	origin: [
-		// "http://localhost:5173",
-		"https://attendance-two-tawny.vercel.app",
+		"http://localhost:5173",
+		// "https://attendance-two-tawny.vercel.app",
 	],
 	methods: ["GET", "POST", "OPTIONS", "PATCH", "DELETE", "PUT"],
 	allowedHeaders: ["Content-Type", "Authorization"],
 	credentials: true,
 };
 
+app.use(cookieParser());
 app.use(cors(corsOptions));
 
 app.use(express.json());

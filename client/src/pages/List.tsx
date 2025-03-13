@@ -79,7 +79,7 @@ const List = () => {
 			<div className="top">
 				<div>
 					<span>
-						<Link to="/">Home</Link> {"> "}
+						<Link to="/dashboard">Home</Link> {"> "}
 						<Link to="/list">Students</Link>
 						{" > "}
 						{studentsList &&
@@ -186,12 +186,7 @@ const List = () => {
 				<SuccessAlert setShowAlertPopup={setShowAlertPopup} />
 			)}
 
-			{showErrorMessage && (
-				<ErrorAlert
-					error={error}
-					setShowErrorMessage={setShowErrorMessage}
-				/>
-			)}
+			{showErrorMessage && <ErrorAlert />}
 		</section>
 	);
 };

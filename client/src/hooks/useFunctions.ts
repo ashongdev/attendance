@@ -1,5 +1,6 @@
 import Axios from "axios";
 import { Dispatch, SetStateAction, useEffect, useRef } from "react";
+import { useCookies } from "react-cookie";
 import { GroupID, Mode, Student } from "../exports/exports";
 
 const useFunctions = () => {
@@ -41,7 +42,9 @@ const useFunctions = () => {
 		}, 2000);
 		alertPopupSetter(true);
 	};
+	const [cookies, setCookie, removeCookie] = useCookies(["auth"]);
 
+	// ! FIX LOGIC HERE
 	const editStudentInfo = async (
 		index_number: string,
 		data: Omit<Student, "present_status" | "attendance_date">,
@@ -49,7 +52,10 @@ const useFunctions = () => {
 		valueSetter: Dispatch<SetStateAction<Student[]>>,
 		modalSetter: Dispatch<SetStateAction<boolean>>,
 		alertPopupSetter: Dispatch<SetStateAction<boolean>>,
-		modeSetter: Dispatch<SetStateAction<Mode>>
+		modeSetter: Dispatch<SetStateAction<Mode>>,
+		errorSetter: Dispatch<
+			SetStateAction<{ header: string; description: string }>
+		>
 	) => {
 		try {
 			const student = getter.filter(
@@ -58,6 +64,7 @@ const useFunctions = () => {
 
 			if (!student) return alert("No data provided for this operation.");
 			const res = await Axios.patch(
+				// "http://localhost:4002/lec/edit",
 				"https://record-attendance.onrender.com/lec/edit",
 				data
 			);
@@ -72,8 +79,15 @@ const useFunctions = () => {
 				res
 			);
 		} catch (error) {
-			alert("An unexpected error occurred");
-			return;
+			errorSetter({
+				header: "An unexpected error occurred.",
+				description: "Please try again.",
+			});
+
+			setTimeout(() => {
+				removeCookie("auth");
+				window.location.href = "/signin";
+			}, 2000);
 		}
 	};
 
@@ -91,9 +105,8 @@ const useFunctions = () => {
 		try {
 			const res = await Axios.get(
 				`https://record-attendance.onrender.com/lec/students/groups`,
-				{ params: { group1, group2, group3, group4 } }
 				// `http://localhost:4002/lec/students/groups`,
-				// { params: { group1, group2, group3, group4 } }
+				{ params: { group1, group2, group3, group4 } }
 			);
 
 			if (!res.data) {
@@ -103,6 +116,8 @@ const useFunctions = () => {
 			setter(res.data);
 		} catch (error: any) {
 			errorPopupSetter(true);
+			localStorage.removeItem("filterGroupID");
+
 			if (error.status === 429) {
 				errorSetter({
 					header: "Could not retrieve data",
@@ -113,6 +128,11 @@ const useFunctions = () => {
 					header: "An unexpected error occurred.",
 					description: "Please try again.",
 				});
+
+				setTimeout(() => {
+					removeCookie("auth");
+					window.location.href = "/signin";
+				}, 1000);
 			}
 		}
 	};
@@ -130,6 +150,7 @@ const useFunctions = () => {
 		try {
 			const res = await Axios.get(
 				`https://record-attendance.onrender.com/lec/students/attendance/${groupid}`
+				// `http://localhost:4002/lec/students/attendance/${groupid}`
 			);
 
 			if (!res.data) {
@@ -139,6 +160,7 @@ const useFunctions = () => {
 			setter(res.data);
 		} catch (error: any) {
 			errorPopupSetter(true);
+
 			if (error.status === 429) {
 				errorSetter({
 					header: "Could not retrieve data",
@@ -149,6 +171,11 @@ const useFunctions = () => {
 					header: "An unexpected error occurred.",
 					description: "Please try again.",
 				});
+
+				setTimeout(() => {
+					removeCookie("auth");
+					window.location.href = "/signin";
+				}, 1000);
 			}
 		}
 	};
@@ -167,6 +194,7 @@ const useFunctions = () => {
 		try {
 			const res = await Axios.post(
 				"https://record-attendance.onrender.com/lec/add-student",
+				// "http://localhost:4002/lec/add-student",
 				data
 			);
 
@@ -185,7 +213,20 @@ const useFunctions = () => {
 		} catch (error: any) {
 			const { msg } = error.response?.data || {};
 			errorPopupSetter(true);
-			errorSetter({ header: "Duplicate Entry", description: msg });
+
+			if (msg.includes("Index number entered already exists")) {
+				errorSetter({ header: "Duplicate Entry", description: msg });
+			} else {
+				errorSetter({
+					header: "An unexpected error occurred.",
+					description: "Please try again.",
+				});
+
+				setTimeout(() => {
+					removeCookie("auth");
+					window.location.href = "/signin";
+				}, 1000);
+			}
 		}
 	};
 	// const generateExcelFile = (
@@ -229,6 +270,7 @@ const useFunctions = () => {
 	// 	}
 	// };
 
+	// ! FIX LOGIC HERE
 	const removeStudent = async (
 		index_number: string,
 		groupid: GroupID,
@@ -244,6 +286,7 @@ const useFunctions = () => {
 		try {
 			const res = await Axios.delete(
 				`https://record-attendance.onrender.com/lec/rem-student/${index_number}`,
+				// `http://localhost:4002/lec/rem-student/${index_number}`,
 				{ params: { groupid } }
 			);
 
@@ -259,10 +302,15 @@ const useFunctions = () => {
 				res
 			);
 		} catch (error: any) {
-			console.log("🚀 ~ useFunctions ~ error:", error);
-			const { msg } = error.response?.data || {};
-			errorPopupSetter(true);
-			errorSetter({ header: "Duplicate Entry", description: msg });
+			errorSetter({
+				header: "An unexpected error occurred.",
+				description: "Please try again.",
+			});
+
+			setTimeout(() => {
+				removeCookie("auth");
+				window.location.href = "/signin";
+			}, 2000);
 		}
 	};
 
