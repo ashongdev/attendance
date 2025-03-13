@@ -54,16 +54,9 @@ const Loading = ({ children }: { children: ReactNode }) => {
 };
 
 const App = () => {
-	const { userData, cookies, setUserData, removeCookie } =
-		useContextProvider();
+	const { cookies } = useContextProvider();
 
-	useEffect(() => {
-		if (cookies.auth) {
-			setUserData(cookies.auth);
-		} else {
-			removeCookie("auth");
-		}
-	}, []);
+	const auth = cookies.auth;
 
 	const router = createBrowserRouter(
 		[
@@ -83,7 +76,7 @@ const App = () => {
 				path: "/dashboard",
 				element: (
 					<RenderSideBar>
-						{!userData ? (
+						{!auth ? (
 							<Navigate to="/signin" />
 						) : (
 							<Loading>
@@ -97,7 +90,7 @@ const App = () => {
 				path: "/list",
 				element: (
 					<RenderSideBar>
-						{!userData ? (
+						{!auth ? (
 							<Navigate to="/signin" />
 						) : (
 							<Loading>
@@ -111,7 +104,7 @@ const App = () => {
 				path: "/attendance",
 				element: (
 					<RenderSideBar>
-						{!userData ? (
+						{!auth ? (
 							<Navigate to="/signin" />
 						) : (
 							<Loading>
@@ -125,7 +118,7 @@ const App = () => {
 				path: "/report",
 				element: (
 					<RenderSideBar>
-						{!userData ? (
+						{!auth ? (
 							<Navigate to="/signin" />
 						) : (
 							<Loading>
@@ -137,7 +130,7 @@ const App = () => {
 			},
 			{
 				path: "/signup",
-				element: !userData ? (
+				element: !auth ? (
 					<RenderSideBar>
 						<Loading>
 							<LecSignup />
@@ -149,7 +142,7 @@ const App = () => {
 			},
 			{
 				path: "/signin",
-				element: !userData ? (
+				element: !auth ? (
 					<RenderSideBar>
 						<Loading>
 							<SignIn />

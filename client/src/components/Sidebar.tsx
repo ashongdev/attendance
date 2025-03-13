@@ -11,13 +11,14 @@ export interface Props {
 	setShowSideBar: Dispatch<SetStateAction<boolean>>;
 }
 const Sidebar: FC<Props> = ({ setShowSideBar }) => {
-	const { userData, page } = useContextProvider();
+	const { cookies, page } = useContextProvider();
+	const auth = cookies.auth;
 
 	return (
 		<aside>
 			<h1>ClassTrack</h1>
 
-			{userData ? (
+			{auth ? (
 				<div className="container">
 					<p>MAIN</p>
 
