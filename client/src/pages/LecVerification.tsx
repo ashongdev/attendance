@@ -57,7 +57,7 @@ const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
 				setShowVerifyButton(true);
 				const endTime = Date.now() + 5 * 60 * 1000;
 
-				setTimeLeft(5 * 60); // Reset timer back to 5 minutes
+				setTimeLeft(5 * 60);
 				const updateTimer = () => {
 					const secondsLeft = Math.round(
 						(endTime - Date.now()) / 1000
@@ -83,6 +83,10 @@ const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
 					header: error.response.data.error,
 					description: "Please login instead.",
 				});
+
+				setTimeout(() => {
+					window.location.href = "/signin";
+				}, 1500);
 				return;
 			}
 			setVerificationErr({

@@ -103,7 +103,7 @@ const Attendance = () => {
 
 		if (!userData) return;
 
-		userData && authenticateLecturer(userData.lecturer_id);
+		authenticateLecturer(userData.lecturer_id);
 		setFilterGroupID(userData?.group1);
 	}, []);
 

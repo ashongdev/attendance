@@ -26,11 +26,12 @@ const Report = () => {
 	const [searchByValue, setSearchByValue] = useState("name");
 	const [searchValue, setSearchValue] = useState("");
 
-	const getReport = async (groupid: GroupID | null) => {
+	const getReport = async (groupid: GroupID | undefined) => {
+		const upperCaseGroupID = groupid?.toUpperCase();
 		try {
 			const res = await Axios.get(
-				// `http://localhost:4002/lec/report/${groupid}`
-				`https://record-attendance.onrender.com/lec/report/${groupid}`
+				// `http://localhost:4002/lec/report/${upperCaseGroupID}`
+				`https://record-attendance.onrender.com/lec/report/${upperCaseGroupID}`
 			);
 			if (res.data) {
 				setReportData(res.data);

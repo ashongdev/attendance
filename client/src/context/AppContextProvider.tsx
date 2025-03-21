@@ -79,6 +79,7 @@ const Context = ({ children }: { children: ReactNode }) => {
 			setCookie("auth", res.data, {
 				httpOnly: true,
 				secure: true,
+				expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
 			});
 			setUserData(res.data);
 

@@ -70,40 +70,36 @@ const SignIn = () => {
 
 	return (
 		<>
-			<div className="form-container">
+			<section className="form-container">
 				<form onSubmit={handleSubmit(submitHandler)}>
-					<section>
-						<h1>Sign In To Your Account</h1>
-						<span>
-							Enter the verification code sent to your email in
-							the box below to complete your verification
-						</span>
-						<br />
-						<br />
+					<h1>Sign In To Your Account</h1>
+					<span>
+						Enter the verification code sent to your email in the
+						box below to complete your verification
+					</span>
+					<br />
+					<br />
 
-						<div className="block">
-							<label htmlFor="id">
-								Enter Identification Number <span>(ID)</span>
-							</label>
-							<input
-								type="text"
-								maxLength={10}
-								placeholder="e.g., 0028012312"
-								{...register("lecturer_id")}
-							/>
-						</div>
+					<div className="block">
+						<label htmlFor="id">
+							Enter Identification Number <span>(ID)</span>
+						</label>
+						<input
+							type="text"
+							maxLength={10}
+							placeholder="e.g., 0028012312"
+							{...register("lecturer_id")}
+						/>
+					</div>
 
-						<div className="block">
-							<label htmlFor="password">
-								Enter Your Password
-							</label>
-							<input type="password" {...register("password")} />
-						</div>
+					<div className="block">
+						<label htmlFor="password">Enter Your Password</label>
+						<input type="password" {...register("password")} />
+					</div>
 
-						<button className="actions submit">Sign in</button>
-					</section>
+					<button className="actions submit">Sign in</button>
 				</form>
-			</div>
+			</section>
 			{showErrorMessage && <ErrorAlert />}
 		</>
 	);

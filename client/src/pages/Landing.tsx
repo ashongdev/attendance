@@ -7,7 +7,7 @@ const Landing = () => {
 			<span>Lorem ipsum dolor sit</span>
 
 			<section className="roles">
-				<Link to="/login" className="role-button login">
+				<Link to="/signin" className="role-button login">
 					Log In
 				</Link>
 				<Link to="/signup" className="role-button signup">
