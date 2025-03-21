@@ -1,6 +1,7 @@
 import Axios from "axios";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import Search from "../components/Search";
 import { GroupID, ReportData } from "../exports/exports";
 import useContextProvider from "../hooks/useContextProvider";
 import useFunctions from "../hooks/useFunctions";
@@ -23,7 +24,7 @@ const Report = () => {
 	const [filteredReportData, setFilteredReportData] = useState<
 		ReportData[] | null
 	>(null);
-	const [searchByValue, setSearchByValue] = useState("name");
+	const [searchByValue, setSearchByValue] = useState<"id" | "name">("name");
 	const [searchValue, setSearchValue] = useState("");
 
 	const getReport = async (groupid: GroupID | undefined) => {
@@ -158,25 +159,12 @@ const Report = () => {
 				</button>
 			</div>
 
-			<div className="search">
-				<select
-					className="option"
-					onChange={(e) => setSearchByValue(e.target.value)}
-				>
-					<option value="name">Name</option>
-					<option value="id">Index Number</option>
-				</select>
-
-				<input
-					value={searchValue}
-					onChange={(e) => setSearchValue(e.target.value)}
-					type="text"
-					maxLength={searchByValue !== "name" ? 10 : 30}
-					placeholder={`Search by ${
-						searchByValue === "id" ? "Index Number" : "Name"
-					}`}
-				/>
-			</div>
+			<Search
+				setSearchByValue={setSearchByValue}
+				searchByValue={searchByValue}
+				setSearchValue={setSearchValue}
+				searchValue={searchValue}
+			/>
 
 			<div className="list-container">
 				<table border={1}>
@@ -192,9 +180,13 @@ const Report = () => {
 						</tr>
 					</thead>
 					<tbody>
-						{filteredReportData && filteredReportData.length > 0
-							? filteredReportData.map(renderStudentRow)
-							: reportData && reportData.map(renderStudentRow)}
+						{filteredReportData && filteredReportData.length > 0 ? (
+							filteredReportData.map(renderStudentRow)
+						) : reportData && reportData?.length > 0 ? (
+							reportData.map(renderStudentRow)
+						) : (
+							<p className="nothing">Nothing to see here 😭</p>
+						)}
 					</tbody>
 				</table>
 			</div>
