@@ -64,11 +64,15 @@ const App = () => {
 				path: "/",
 				element: (
 					<>
-						<RenderSideBar>
-							<Loading>
-								<Landing />
-							</Loading>
-						</RenderSideBar>
+						{!auth ? (
+							<RenderSideBar>
+								<Loading>
+									<Landing />
+								</Loading>
+							</RenderSideBar>
+						) : (
+							<Navigate to="/dashboard" />
+						)}
 					</>
 				),
 			},
