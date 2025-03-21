@@ -203,7 +203,7 @@ const editStudentInfo = async (req: Request, res: Response) => {
 		);
 
 		const response = await pool.query(
-			"SELECT FULLNAME, EMAIL, UPPER(GROUPID), INDEX_NUMBER FROM STUDENTS WHERE UPPER(GROUPID) = $1 ORDER BY STUDENT_ID",
+			"SELECT FULLNAME, EMAIL, UPPER(GROUPID) AS GROUPID, INDEX_NUMBER FROM STUDENTS WHERE UPPER(GROUPID) = $1 ORDER BY STUDENT_ID",
 			[trimmedGroupID]
 		);
 		res.json(response.rows);
@@ -226,7 +226,7 @@ const getStudentsAttendanceList = async (
 
 	try {
 		const response = await pool.query(
-			`SELECT DISTINCT ON (S.INDEX_NUMBER) A.PRESENT_STATUS, A.ATTENDANCE_DATE, INDEX_NUMBER, FULLNAME, UPPER(GROUPID), EMAIL, DATE_OF_BIRTH FROM STUDENTS AS S
+			`SELECT DISTINCT ON (S.INDEX_NUMBER) A.PRESENT_STATUS, A.ATTENDANCE_DATE, INDEX_NUMBER, FULLNAME, UPPER(GROUPID) AS GROUPID, EMAIL, DATE_OF_BIRTH FROM STUDENTS AS S
 			LEFT JOIN ATTENDANCE AS A
 			ON S.INDEX_NUMBER = A.STUDENT_ID
 			WHERE UPPER(S.GROUPID) = $1 ORDER BY S.INDEX_NUMBER, A.ATTENDANCE_DATE DESC`,
@@ -250,7 +250,7 @@ const getStudentsList = async (req: Request, res: Response): Promise<void> => {
 
 	try {
 		const response = await pool.query(
-			"SELECT FULLNAME, EMAIL, UPPER(GROUPID), INDEX_NUMBER FROM STUDENTS WHERE UPPER(GROUPID) IN($1, $2, $3, $4) ORDER BY GROUPID, STUDENT_ID",
+			"SELECT FULLNAME, EMAIL, UPPER(GROUPID) AS GROUPID, INDEX_NUMBER FROM STUDENTS WHERE UPPER(GROUPID) IN($1, $2, $3, $4) ORDER BY GROUPID, STUDENT_ID",
 			[
 				group1?.toString().toUpperCase(),
 				group2?.toString().toUpperCase(),
@@ -291,7 +291,7 @@ const addStudent = async (req: Request, res: Response): Promise<void> => {
 			]
 		);
 		const response = await pool.query(
-			"SELECT FULLNAME, EMAIL, UPPER(GROUPID), INDEX_NUMBER FROM STUDENTS WHERE UPPER(GROUPID) = $1 ORDER BY STUDENT_ID",
+			"SELECT FULLNAME, EMAIL, UPPER(GROUPID) AS GROUPID, INDEX_NUMBER FROM STUDENTS WHERE UPPER(GROUPID) = $1 ORDER BY STUDENT_ID",
 			[trimmedGroupID]
 		);
 		res.json(response.rows);
@@ -317,7 +317,7 @@ const removeStudent = async (req: Request, res: Response) => {
 		await pool.query(`DELETE FROM STUDENTS WHERE INDEX_NUMBER = $1`, [id]);
 
 		const response = await pool.query(
-			"SELECT FULLNAME, EMAIL, UPPER(GROUPID), INDEX_NUMBER FROM STUDENTS WHERE UPPER(GROUPID) = $1 ORDER BY STUDENT_ID",
+			"SELECT FULLNAME, EMAIL, UPPER(GROUPID) AS GROUPID, INDEX_NUMBER FROM STUDENTS WHERE UPPER(GROUPID) = $1 ORDER BY STUDENT_ID",
 			[trimmedGroupID]
 		);
 		res.json(response.rows);
@@ -458,7 +458,7 @@ const generateSheetReport = async (req: Request, res: Response) => {
 	try {
 		const sql = await pool.query(
 			`SELECT 
-			UPPER(s.groupid),
+			UPPER(s.groupid) AS groupid,
 			a.student_id, 
 			s.fullname,  
 			COUNT(CASE WHEN a.present_status = true THEN 1 END) AS days_present,

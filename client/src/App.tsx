@@ -25,12 +25,12 @@ import SignIn from "./pages/SignIn.tsx";
 
 // !rnfz
 const RenderSideBar = ({ children }: { children: ReactNode }) => {
-	const [showSideBar, setShowSideBar] = useState(false);
+	const [showSideBar, setShowSideBar] = useState(true);
 
 	return (
 		<main style={{ marginLeft: showSideBar ? "15rem" : "0rem" }}>
 			<Header setShowSideBar={setShowSideBar} />
-			{showSideBar && <Sidebar setShowSideBar={setShowSideBar} />}
+			{showSideBar && <Sidebar />}
 			{children}
 		</main>
 	);
@@ -64,11 +64,15 @@ const App = () => {
 				path: "/",
 				element: (
 					<>
-						<RenderSideBar>
-							<Loading>
-								<Landing />
-							</Loading>
-						</RenderSideBar>
+						{!auth ? (
+							<RenderSideBar>
+								<Loading>
+									<Landing />
+								</Loading>
+							</RenderSideBar>
+						) : (
+							<Navigate to="/dashboard" />
+						)}
 					</>
 				),
 			},

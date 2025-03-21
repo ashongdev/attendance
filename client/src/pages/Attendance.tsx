@@ -4,6 +4,7 @@ import { formatDate } from "date-fns";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ErrorAlert from "../components/ErrorAlert";
+import Search from "../components/Search";
 import { GroupID, Status, Student } from "../exports/exports";
 import useContextProvider from "../hooks/useContextProvider";
 import useFunctions from "../hooks/useFunctions";
@@ -23,14 +24,18 @@ const Attendance = () => {
 	const [filterGroupID, setFilterGroupID] = useState<GroupID | undefined>(
 		getStorageItem("filterGroupID", null)
 	);
-	const [filteredStudentList, setFilterStudentList] = useState<Student[]>([]);
+	const [filteredStudentsList, setFilteredStudentsList] = useState<
+		Student[] | null
+	>([]);
+	const [searchValue, setSearchValue] = useState("");
+	const [searchByValue, setSearchByValue] = useState<"id" | "name">("name");
 
 	// Filter by group
 	const filterStudents = (groupid: GroupID | undefined) => {
 		const filteredStudents = attendanceList.filter(
 			(student) => student.groupid === groupid
 		);
-		setFilterStudentList(filteredStudents);
+		setFilteredStudentsList(filteredStudents);
 	};
 
 	const [attendanceList, setAttendanceList] = useState<Student[]>([]);
@@ -97,6 +102,22 @@ const Attendance = () => {
 				filterGroupID
 			);
 	}, [filterGroupID]);
+
+	useEffect(() => {
+		if (attendanceList && attendanceList.length > 1) {
+			const findStudent = attendanceList.filter((data) =>
+				searchByValue === "id"
+					? data.index_number.trim().includes(searchValue)
+					: data.fullname.trim().toLowerCase().includes(searchValue)
+			);
+
+			if (findStudent.length === 1) {
+				setFilteredStudentsList(findStudent);
+			} else {
+				setFilteredStudentsList(null);
+			}
+		}
+	}, [searchValue]);
 
 	useEffect(() => {
 		setPage(window.location.pathname);
@@ -289,6 +310,13 @@ const Attendance = () => {
 				</button>
 			</div>
 
+			<Search
+				setSearchByValue={setSearchByValue}
+				searchByValue={searchByValue}
+				setSearchValue={setSearchValue}
+				searchValue={searchValue}
+			/>
+
 			<div className="list-container">
 				<table border={1}>
 					<thead>
@@ -302,9 +330,14 @@ const Attendance = () => {
 						</tr>
 					</thead>
 					<tbody>
-						{filteredStudentList.length > 0
-							? filteredStudentList.map(renderStudentRow)
-							: attendanceList.map(renderStudentRow)}
+						{filteredStudentsList &&
+						filteredStudentsList.length > 0 ? (
+							filteredStudentsList.map(renderStudentRow)
+						) : attendanceList && attendanceList.length > 0 ? (
+							attendanceList.map(renderStudentRow)
+						) : (
+							<p className="nothing">Nothing to see here 😭</p>
+						)}
 					</tbody>
 				</table>
 			</div>

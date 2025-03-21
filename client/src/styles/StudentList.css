@@ -193,3 +193,13 @@ td button:last-child:hover {
 td button:hover .action-icon {
 	filter: invert(1);
 }
+.nothing {
+	text-align: center;
+	font-size: 1.5em;
+	color: #888;
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	white-space: nowrap;
+}

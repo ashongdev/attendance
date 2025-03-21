@@ -76,6 +76,7 @@ const Context = ({ children }: { children: ReactNode }) => {
 				// `http://localhost:4002/lec/auth/${id}`
 				`https://record-attendance.onrender.com/lec/auth/${id}`
 			);
+
 			setCookie("auth", res.data, {
 				httpOnly: true,
 				secure: true,

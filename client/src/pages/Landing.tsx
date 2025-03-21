@@ -1,6 +1,15 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import useContextProvider from "../hooks/useContextProvider";
 
 const Landing = () => {
+	const { userData, authenticateLecturer } = useContextProvider();
+	useEffect(() => {
+		if (!userData) return;
+
+		authenticateLecturer(userData.lecturer_id);
+	}, []);
+
 	return (
 		<div className="landing-page">
 			<h1>Welcome to ClassTrack</h1>

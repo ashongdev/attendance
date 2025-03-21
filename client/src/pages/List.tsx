@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Confirm from "../components/ConfirmationModal";
 import ErrorAlert from "../components/ErrorAlert";
 import Form from "../components/Form";
+import Search from "../components/Search";
 import SuccessAlert from "../components/SuccessAlert";
 import { Student } from "../exports/exports";
 import useContextProvider from "../hooks/useContextProvider";
@@ -29,6 +30,11 @@ const List = () => {
 		authenticateLecturer,
 		setPage,
 	} = useContextProvider();
+	const [filteredStudentsList, setFilteredStudentsList] = useState<
+		Student[] | null
+	>(null);
+	const [searchValue, setSearchValue] = useState("");
+	const [searchByValue, setSearchByValue] = useState<"id" | "name">("name");
 
 	const [studentToBeEdited, setStudentToBeEdited] = useState<
 		Omit<Student, "present_status" | "attendance_date" | "attendance_date">
@@ -43,6 +49,22 @@ const List = () => {
 
 		setStudentToBeEdited(student);
 	};
+
+	useEffect(() => {
+		if (studentsList && studentsList.length > 1) {
+			const findStudent = studentsList.filter((data) =>
+				searchByValue === "id"
+					? data.index_number.trim().includes(searchValue)
+					: data.fullname.trim().toLowerCase().includes(searchValue)
+			);
+
+			if (findStudent.length === 1) {
+				setFilteredStudentsList(findStudent);
+			} else {
+				setFilteredStudentsList(null);
+			}
+		}
+	}, [searchValue]);
 
 	useEffect(() => {
 		setPage(window.location.pathname);
@@ -61,6 +83,46 @@ const List = () => {
 			userData.group4
 		);
 	}, []);
+
+	const renderStudentRow = (student: any, index: number) => {
+		return (
+			<tr key={student.index_number}>
+				<td>{index + 1}</td>
+				<td>{student.index_number}</td>
+				<td>{student.fullname}</td>
+				<td>{student.email}</td>
+				<td className="groupid">{student.groupid}</td>
+				<td className="status">
+					<button
+						onClick={() => {
+							setOpenModal(true);
+							setMode("edit");
+							getStudentInfo(student.index_number);
+						}}
+					>
+						<img
+							src={editIcon}
+							className="action-icon"
+							alt="edit-icon"
+						/>
+					</button>
+					<button
+						onClick={() => {
+							setMode("del");
+							getStudentInfo(student.index_number);
+							setOpenModal(true);
+						}}
+					>
+						<img
+							src={trashCanIcon}
+							className="action-icon"
+							alt="delete-icon"
+						/>
+					</button>
+				</td>
+			</tr>
+		);
+	};
 
 	return (
 		<section className="list-section">
@@ -106,6 +168,13 @@ const List = () => {
 				</button>
 			</div>
 
+			<Search
+				setSearchByValue={setSearchByValue}
+				searchByValue={searchByValue}
+				setSearchValue={setSearchValue}
+				searchValue={searchValue}
+			/>
+
 			<div className="list-container">
 				<table border={1}>
 					<thead>
@@ -119,51 +188,14 @@ const List = () => {
 						</tr>
 					</thead>
 					<tbody>
-						{studentsList &&
-							studentsList.length > 0 &&
-							studentsList.map((student, index) => (
-								<tr key={student.index_number}>
-									<td>{index + 1}</td>
-									<td>{student.index_number}</td>
-									<td>{student.fullname}</td>
-									<td>{student.email}</td>
-									<td className="groupid">
-										{student.groupid}
-									</td>
-									<td className="status">
-										<button
-											onClick={() => {
-												setOpenModal(true);
-												setMode("edit");
-												getStudentInfo(
-													student.index_number
-												);
-											}}
-										>
-											<img
-												src={editIcon}
-												className="action-icon"
-												alt="edit-icon"
-											/>
-										</button>
-										<button
-											onClick={() => {
-												setMode("del");
-												getStudentInfo(
-													student.index_number
-												);
-												setOpenModal(true);
-											}}
-										>
-											<img
-												src={trashCanIcon}
-												className="action-icon"
-												alt="delete-icon"
-											/>
-										</button>
-									</td>
-								</tr>
-							))}
+						{filteredStudentsList &&
+						filteredStudentsList.length > 0 ? (
+							filteredStudentsList.map(renderStudentRow)
+						) : studentsList && studentsList.length > 0 ? (
+							studentsList.map(renderStudentRow)
+						) : (
+							<p className="nothing">Nothing to see here 😭</p>
+						)}
 					</tbody>
 				</table>
 			</div>
