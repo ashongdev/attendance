@@ -30,7 +30,7 @@ const RenderSideBar = ({ children }: { children: ReactNode }) => {
 	return (
 		<main style={{ marginLeft: showSideBar ? "15rem" : "0rem" }}>
 			<Header setShowSideBar={setShowSideBar} />
-			{showSideBar && <Sidebar setShowSideBar={setShowSideBar} />}
+			{showSideBar && <Sidebar />}
 			{children}
 		</main>
 	);

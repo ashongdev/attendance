@@ -1,4 +1,3 @@
-import { Dispatch, FC, SetStateAction } from "react";
 import { Link } from "react-router-dom";
 import useContextProvider from "../hooks/useContextProvider";
 import SheetReportIcon from "../images/layers-outline.svg";
@@ -7,10 +6,7 @@ import dashboardIcon from "../images/planet-outline.svg";
 import studentsIcon from "../images/school-outline.svg";
 import personIcon from "../images/user-regular.svg";
 
-export interface Props {
-	setShowSideBar: Dispatch<SetStateAction<boolean>>;
-}
-const Sidebar: FC<Props> = ({ setShowSideBar }) => {
+const Sidebar = () => {
 	const { cookies, page } = useContextProvider();
 	const auth = cookies.auth;
 

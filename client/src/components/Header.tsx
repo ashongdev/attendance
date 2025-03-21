@@ -1,4 +1,5 @@
 import { Dispatch, FC, SetStateAction } from "react";
+import useContextProvider from "../hooks/useContextProvider";
 import useFunctions from "../hooks/useFunctions";
 import menuIcon from "../images/reorder-three-outline.svg";
 import personIcon from "../images/user-regular.svg";
@@ -9,8 +10,7 @@ interface Props {
 
 const Header: FC<Props> = ({ setShowSideBar }) => {
 	const { getStorageItem } = useFunctions();
-
-	const role = getStorageItem("role", null);
+	const { userData } = useContextProvider();
 
 	return (
 		<header>
@@ -19,8 +19,8 @@ const Header: FC<Props> = ({ setShowSideBar }) => {
 			</div>
 
 			<div>
+				{userData?.fullname && <span>{userData.fullname}</span>}
 				<img src={personIcon} className="person-icon" alt="" />
-				<span>Admin</span>
 			</div>
 		</header>
 	);
