@@ -10,7 +10,7 @@ import {
 	getStudentsAttendanceList,
 	getStudentsList,
 	removeStudent,
-	signup,
+	signIn,
 	tickAttendance,
 } from "../controllers/lecturerController";
 
@@ -33,12 +33,12 @@ router.get("/lec/compare/:id", compareCode);
 router.get("/lec/report/:groupid", generateSheetReport);
 
 router.post("/lec/add-student", addStudent);
-router.post("/lec/signup", signup);
+router.post("/lec/signin", signIn);
 
 router.delete("/lec/rem-student/:id", removeStudent);
 
-// router.post("/register-course", registerCourse);
 router.patch("/lec/edit", editStudentInfo);
+
 router.put("/lec/tick_attendance", tickAttendance);
 
 export default router;

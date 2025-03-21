@@ -111,7 +111,7 @@ const LecSignup = () => {
 	}, [pageNo]);
 
 	return (
-		<div className="signin-cont">
+		<div className="form-container">
 			<form onSubmit={handleSubmit(submitHandler)}>
 				<div className="header">
 					{pageNo === 1 && <h1>Personal Info</h1>}

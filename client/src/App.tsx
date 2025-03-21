@@ -11,10 +11,12 @@ import Sidebar from "./components/Sidebar";
 import useContextProvider from "./hooks/useContextProvider.ts";
 import Attendance from "./pages/Attendance.tsx";
 import Dashboard from "./pages/Dashboard";
+import Landing from "./pages/Landing.tsx";
 import LecSignup from "./pages/LecSignup.tsx";
 import List from "./pages/List";
 import PageNotFound from "./pages/PageNotFound.tsx";
 import Report from "./pages/Report.tsx";
+import SignIn from "./pages/SignIn.tsx";
 
 // !Download Oh MY ZSH for my terminal
 // todo: Add loader styles to css
@@ -52,16 +54,30 @@ const Loading = ({ children }: { children: ReactNode }) => {
 };
 
 const App = () => {
-	const { userData } = useContextProvider();
+	const { cookies } = useContextProvider();
+
+	const auth = cookies.auth;
 
 	const router = createBrowserRouter(
 		[
 			{
 				path: "/",
 				element: (
+					<>
+						<RenderSideBar>
+							<Loading>
+								<Landing />
+							</Loading>
+						</RenderSideBar>
+					</>
+				),
+			},
+			{
+				path: "/dashboard",
+				element: (
 					<RenderSideBar>
-						{!userData ? (
-							<Navigate to="/signup" />
+						{!auth ? (
+							<Navigate to="/signin" />
 						) : (
 							<Loading>
 								<Dashboard />
@@ -74,8 +90,8 @@ const App = () => {
 				path: "/list",
 				element: (
 					<RenderSideBar>
-						{!userData ? (
-							<Navigate to="/signup" />
+						{!auth ? (
+							<Navigate to="/signin" />
 						) : (
 							<Loading>
 								<List />
@@ -88,8 +104,8 @@ const App = () => {
 				path: "/attendance",
 				element: (
 					<RenderSideBar>
-						{!userData ? (
-							<Navigate to="/signup" />
+						{!auth ? (
+							<Navigate to="/signin" />
 						) : (
 							<Loading>
 								<Attendance />
@@ -102,8 +118,8 @@ const App = () => {
 				path: "/report",
 				element: (
 					<RenderSideBar>
-						{!userData ? (
-							<Navigate to="/signup" />
+						{!auth ? (
+							<Navigate to="/signin" />
 						) : (
 							<Loading>
 								<Report />
@@ -113,21 +129,27 @@ const App = () => {
 				),
 			},
 			{
-				path: "signup",
-				element: !userData ? (
-					<>
-						<RenderSideBar>
-							{userData ? (
-								<Navigate to="/" />
-							) : (
-								<Loading>
-									<LecSignup />
-								</Loading>
-							)}
-						</RenderSideBar>
-					</>
+				path: "/signup",
+				element: !auth ? (
+					<RenderSideBar>
+						<Loading>
+							<LecSignup />
+						</Loading>
+					</RenderSideBar>
 				) : (
-					<Navigate to="/" />
+					<Navigate to="/dashboard" />
+				),
+			},
+			{
+				path: "/signin",
+				element: !auth ? (
+					<RenderSideBar>
+						<Loading>
+							<SignIn />
+						</Loading>
+					</RenderSideBar>
+				) : (
+					<Navigate to="/dashboard" />
 				),
 			},
 			{

@@ -11,20 +11,23 @@ export interface Props {
 	setShowSideBar: Dispatch<SetStateAction<boolean>>;
 }
 const Sidebar: FC<Props> = ({ setShowSideBar }) => {
-	const { userData, page } = useContextProvider();
+	const { cookies, page } = useContextProvider();
+	const auth = cookies.auth;
 
 	return (
 		<aside>
 			<h1>ClassTrack</h1>
 
-			{userData ? (
+			{auth ? (
 				<div className="container">
 					<p>MAIN</p>
 
 					<div className="links">
 						<Link
-							className={page === "/" ? "current-link" : ""}
-							to="/"
+							className={
+								page === "/dashboard" ? "current-link" : ""
+							}
+							to="/dashboard"
 							onClick={() => {
 								setTimeout(() => {
 									setShowSideBar(false);
@@ -94,6 +97,19 @@ const Sidebar: FC<Props> = ({ setShowSideBar }) => {
 						>
 							<img src={personIcon} alt="" />
 							<span>Signup</span>
+						</Link>
+
+						<Link
+							className={page === "/signin" ? "current-link" : ""}
+							to="/signin"
+							onClick={() => {
+								setTimeout(() => {
+									setShowSideBar(false);
+								}, 500);
+							}}
+						>
+							<img src={personIcon} alt="" />
+							<span>Sign In</span>
 						</Link>
 					</div>
 				</div>

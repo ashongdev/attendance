@@ -11,7 +11,6 @@ import {
 import ErrorAlert from "../components/ErrorAlert";
 import SuccessAlert from "../components/SuccessAlert";
 import useContextProvider from "../hooks/useContextProvider";
-import useFunctions from "../hooks/useFunctions";
 import useInputFunctions from "../hooks/useInputFunctions";
 
 interface Props {
@@ -22,7 +21,6 @@ interface Props {
 }
 
 const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
-	const { getStorageItem } = useFunctions();
 	const {
 		setShowAlertPopup,
 		showAlertPopup,
@@ -30,13 +28,14 @@ const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
 		setTimeLeft,
 		minutes,
 		seconds,
+		setError,
+		setShowErrorMessage,
+		showErrorMessage,
 	} = useContextProvider();
 	const { handleInput, handleKeyDown, handlePaste } = useInputFunctions();
 	const { authenticateLecturer } = useContextProvider();
 
 	const [showTextBox, setShowTextBox] = useState(false);
-	const [showVerificationErr, setShowVerificationErr] =
-		useState<boolean>(false);
 	const [showVerifyButton, setShowVerifyButton] = useState<boolean>(false);
 	const [verificationErr, setVerificationErr] = useState({
 		header: "",
@@ -54,10 +53,11 @@ const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
 			if (!res.data) return alert("An unexpected error occurred!");
 
 			if (res.data.ok) {
+				setShowTextBox(true);
 				setShowVerifyButton(true);
 				const endTime = Date.now() + 5 * 60 * 1000;
 
-				setTimeLeft(5 * 60); // Reset timer back to 5 minutes
+				setTimeLeft(5 * 60);
 				const updateTimer = () => {
 					const secondsLeft = Math.round(
 						(endTime - Date.now()) / 1000
@@ -77,7 +77,18 @@ const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
 				updateTimer();
 			}
 		} catch (error: any) {
-			setShowVerificationErr(true);
+			setShowErrorMessage(true);
+			if (error.response.data.error === "User already exists.") {
+				setError({
+					header: error.response.data.error,
+					description: "Please login instead.",
+				});
+
+				setTimeout(() => {
+					window.location.href = "/signin";
+				}, 1500);
+				return;
+			}
 			setVerificationErr({
 				header: "Unexpected Error",
 				description: "An unexpected error occurredd. Please try again.",
@@ -95,7 +106,6 @@ const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
 
 	const compareCode = async (codeInput: string, id: string) => {
 		if (!id) {
-			setShowVerificationErr(true);
 			setVerificationErr({
 				header: "Unexpected Error",
 				description: "Unexpected error occurred. Please try again!",
@@ -112,18 +122,13 @@ const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
 			);
 
 			if (res.data.ok) {
-				setShowVerificationErr(false);
 				setShowAlertPopup(true);
-
-				window.location.href = "/";
+				window.location.href = "/dashboard";
 
 				authenticateLecturer(id);
 			}
 		} catch (error: any) {
-			console.log("🚀 ~ compareCode ~ error:", error);
-			setShowVerificationErr(true);
 			if (error.response.data.error.toString().includes("Invalid")) {
-				setShowVerificationErr(true);
 				setVerificationErr({
 					header: "404: Code errror",
 					description: "Invalid verification code",
@@ -255,7 +260,6 @@ const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
 								className="actions submit"
 								onClick={() => {
 									userData && generateCode(userData.email);
-									setShowTextBox(true);
 								}}
 							>
 								Send Verification Code
@@ -263,17 +267,12 @@ const LecVerification: FC<Props> = ({ pageNo, setPageNo }) => {
 						</>
 					)}
 				</div>
-			</section>
 
-			{showAlertPopup && (
-				<SuccessAlert setShowAlertPopup={setShowAlertPopup} />
-			)}
-			{showVerificationErr && (
-				<ErrorAlert
-					error={verificationErr}
-					setShowErrorMessage={setShowVerificationErr}
-				/>
-			)}
+				{showAlertPopup && (
+					<SuccessAlert setShowAlertPopup={setShowAlertPopup} />
+				)}
+				{showErrorMessage && <ErrorAlert />}
+			</section>
 		</>
 	);
 };

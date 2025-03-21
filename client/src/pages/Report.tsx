@@ -26,11 +26,12 @@ const Report = () => {
 	const [searchByValue, setSearchByValue] = useState("name");
 	const [searchValue, setSearchValue] = useState("");
 
-	const getReport = async (groupid: GroupID | null) => {
+	const getReport = async (groupid: GroupID | undefined) => {
+		const upperCaseGroupID = groupid?.toUpperCase();
 		try {
 			const res = await Axios.get(
-				// `http://localhost:4002/lec/report/${groupid}`
-				`https://record-attendance.onrender.com/lec/report/${groupid}`
+				// `http://localhost:4002/lec/report/${upperCaseGroupID}`
+				`https://record-attendance.onrender.com/lec/report/${upperCaseGroupID}`
 			);
 			if (res.data) {
 				setReportData(res.data);
@@ -66,21 +67,24 @@ const Report = () => {
 		}
 	}, [filterGroupID]);
 
-	const renderStudentRow = (student: any, index: number) => (
-		<tr key={student.student_id}>
-			<td>{index + 1}</td>
-			<td>{student.student_id}</td>
-			<td>{student.fullname}</td>
-			<td className="days">{student.days_present}</td>
-			<td className="days">{student.days_absent}</td>
-			<td className="days">{student.total_days}</td>
-			<td className="days">
-				{(Number(student.days_present) / Number(student.total_days)) *
-					100}
-				%
-			</td>
-		</tr>
-	);
+	const renderStudentRow = (student: any, index: number) => {
+		const percent = (
+			(Number(student.days_present) / Number(student.total_days)) *
+			100
+		).toFixed(2);
+
+		return (
+			<tr key={student.student_id}>
+				<td>{index + 1}</td>
+				<td>{student.student_id}</td>
+				<td>{student.fullname}</td>
+				<td className="days">{student.days_present}</td>
+				<td className="days">{student.days_absent}</td>
+				<td className="days">{student.total_days}</td>
+				<td className="days">{percent}%</td>
+			</tr>
+		);
+	};
 
 	useEffect(() => {
 		if (reportData && reportData.length > 1) {
@@ -104,7 +108,7 @@ const Report = () => {
 			<div className="top">
 				<div>
 					<span>
-						<Link to="/">Home</Link>
+						<Link to="/dashboard">Home</Link>
 						{" > "}
 						<Link to="/report">Report</Link>
 						{" > "}
