@@ -12,7 +12,7 @@ import editIcon from "../images/create-outline.svg";
 import trashCanIcon from "../images/trash-outline.svg";
 
 const List = () => {
-	const { getStudentsList } = useFunctions();
+	const { getStudentsList, searchFunction } = useFunctions();
 	const {
 		studentsList,
 		setStudentsList,
@@ -51,19 +51,13 @@ const List = () => {
 	};
 
 	useEffect(() => {
-		if (studentsList && studentsList.length > 1) {
-			const findStudent = studentsList.filter((data) =>
-				searchByValue === "id"
-					? data.index_number.trim().includes(searchValue)
-					: data.fullname.trim().toLowerCase().includes(searchValue)
-			);
-
-			if (findStudent.length === 1) {
-				setFilteredStudentsList(findStudent);
-			} else {
-				setFilteredStudentsList(null);
-			}
-		}
+		searchFunction(
+			studentsList,
+			setFilteredStudentsList,
+			searchByValue,
+			searchValue,
+			"index_number"
+		);
 	}, [searchValue]);
 
 	useEffect(() => {

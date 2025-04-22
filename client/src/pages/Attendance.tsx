@@ -10,7 +10,8 @@ import useContextProvider from "../hooks/useContextProvider";
 import useFunctions from "../hooks/useFunctions";
 
 const Attendance = () => {
-	const { getStudentsAttendanceList, getStorageItem } = useFunctions();
+	const { getStudentsAttendanceList, getStorageItem, searchFunction } =
+		useFunctions();
 	const {
 		setShowErrorMessage,
 		showErrorMessage,
@@ -41,6 +42,17 @@ const Attendance = () => {
 	const [attendanceList, setAttendanceList] = useState<Student[]>([]);
 	const [clickedStudent, setClickedStudent] = useState<Student | null>(null);
 	const [status, setStatus] = useState<boolean | null>(null);
+
+	useEffect(() => {
+		searchFunction(
+			attendanceList,
+			setFilteredStudentsList,
+			searchByValue,
+			searchValue,
+			"index_number"
+		);
+	}, [searchValue]);
+
 	const changeStudentStatus = async (
 		studentDetails: Student,
 		present_status: Status
@@ -102,22 +114,6 @@ const Attendance = () => {
 				filterGroupID
 			);
 	}, [filterGroupID]);
-
-	useEffect(() => {
-		if (attendanceList && attendanceList.length > 1) {
-			const findStudent = attendanceList.filter((data) =>
-				searchByValue === "id"
-					? data.index_number.trim().includes(searchValue)
-					: data.fullname.trim().toLowerCase().includes(searchValue)
-			);
-
-			if (findStudent.length === 1) {
-				setFilteredStudentsList(findStudent);
-			} else {
-				setFilteredStudentsList(null);
-			}
-		}
-	}, [searchValue]);
 
 	useEffect(() => {
 		setPage(window.location.pathname);

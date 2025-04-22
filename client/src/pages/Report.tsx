@@ -7,7 +7,7 @@ import useContextProvider from "../hooks/useContextProvider";
 import useFunctions from "../hooks/useFunctions";
 
 const Report = () => {
-	const { getStorageItem } = useFunctions();
+	const { getStorageItem, searchFunction } = useFunctions();
 	const {
 		userData,
 		authenticateLecturer,
@@ -51,6 +51,16 @@ const Report = () => {
 	};
 
 	useEffect(() => {
+		searchFunction(
+			reportData,
+			setFilteredReportData,
+			searchByValue,
+			searchValue,
+			"student_id"
+		);
+	}, [searchValue]);
+
+	useEffect(() => {
 		setPage(window.location.pathname);
 
 		if (userData && filterGroupID) {
@@ -86,22 +96,6 @@ const Report = () => {
 			</tr>
 		);
 	};
-
-	useEffect(() => {
-		if (reportData && reportData.length > 1) {
-			const findStudent = reportData.filter((data) =>
-				searchByValue === "id"
-					? data.student_id.trim().includes(searchValue)
-					: data.fullname.trim().toLowerCase().includes(searchValue)
-			);
-
-			if (findStudent.length === 1) {
-				setFilteredReportData(findStudent);
-			} else {
-				setFilteredReportData(null);
-			}
-		}
-	}, [searchValue]);
 
 	return (
 		<section className="list-section">

@@ -318,12 +318,38 @@ const useFunctions = () => {
 		return () => clearTimer();
 	}, []);
 
+	const searchFunction = (
+		getter: any,
+		filteredListSetter: Dispatch<SetStateAction<any>>,
+		searchByValue: "id" | "name",
+		searchValue: string,
+		searchKey: "student_id" | "index_number"
+	) => {
+		if (getter && getter.length > 1) {
+			const findStudent = getter.filter((data: any) =>
+				searchByValue === "id"
+					? data[searchKey].includes(searchValue.toLowerCase())
+					: data.fullname
+							.trim()
+							.toLowerCase()
+							.includes(searchValue.toLowerCase())
+			);
+
+			if (findStudent.length === 1) {
+				filteredListSetter(findStudent);
+			} else {
+				filteredListSetter(null);
+			}
+		}
+	};
+
 	return {
 		getStorageItem,
 		getStudentsList,
 		editStudentInfo,
 		addStudent,
 		removeStudent,
+		searchFunction,
 		clearTimer,
 		getStudentsAttendanceList,
 	};

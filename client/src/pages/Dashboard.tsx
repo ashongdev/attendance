@@ -40,7 +40,6 @@ const Dashboard = () => {
 		<section>
 			<p>Dashboard</p>
 			<span>Welcome to the Attendance Management System</span>
-
 			<div className="cards">
 				<div className="card">
 					Total Students

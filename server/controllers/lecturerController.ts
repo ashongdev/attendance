@@ -36,11 +36,11 @@ const generateCode = async (req: any, res: Response): Promise<void> => {
 		try {
 			const saltRounds = await genSalt(10);
 			const hashedPassword = await hash(password, saltRounds);
-			arrNum = [];
 
-			for (let i = 0; i < 6; i++) {
-				const randomNum = Math.floor(Math.random() * 9);
-				arrNum.push(randomNum);
+			arrNum.push(Math.floor(Math.random() * 9) + 1);
+
+			for (let i = 0; i < 5; i++) {
+				arrNum.push(Math.floor(Math.random() * 10));
 			}
 			const code = arrNum.join("");
 			console.log("🚀 ~ generateCode ~ code:", code);
@@ -406,7 +406,7 @@ const tickAttendance = async (req: Request, res: Response): Promise<void> => {
 		const response = await pool.query(
 			`SELECT DISTINCT ON (S.INDEX_NUMBER) 
 				A.PRESENT_STATUS, A.ATTENDANCE_DATE, S.INDEX_NUMBER, S.FULLNAME, 
-				UPPER(S.GROUPID), S.EMAIL, S.DATE_OF_BIRTH 
+				UPPER(S.GROUPID) AS GROUPID, S.EMAIL, S.DATE_OF_BIRTH 
 			FROM STUDENTS AS S
 			LEFT JOIN ATTENDANCE AS A ON S.INDEX_NUMBER = A.STUDENT_ID
 			WHERE UPPER(S.GROUPID) = $1 
